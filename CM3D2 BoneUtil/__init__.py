@@ -1,7 +1,7 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 0, 1),
+	"version" : (0, 0, 2),
 	"blender" : (2, 76, 0),
 	"location" : "",
 	"description" : "カスタムメイド3D2のボーン関連の補助機能を提供します",

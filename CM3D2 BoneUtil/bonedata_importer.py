@@ -138,7 +138,6 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 
 		ob = context.active_object
 		if ob.type == 'MESH':
-			self.layout.prop(self, 'sync_lbd', icon='ERROR')
 			self.layout.label(text="頂点グループ:", icon='GROUP_VERTEX')
 			self.layout.prop(self, 'vg_opr', icon='NONE', expand=True)
 
@@ -218,7 +217,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 
 
 		# 処理件数を出力する。BoneData数, LocalBoneData数
-		logmsg = "処理ボーン件数:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d)" % (len(self.treated_bones),
+		logmsg = "処理件数:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d)" % (len(self.treated_bones),
 			self.count_bd_add, self.count_bd_update, count_bd_del,
 			self.count_lbd_add,self.count_lbd_update, count_lbd_del)
 		self.report(type={'INFO'}, message="BoneData取込み完了." + logmsg)
