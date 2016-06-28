@@ -1,10 +1,10 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 0, 2),
+	"version" : (0, 1, 2),
 	"blender" : (2, 76, 0),
-	"location" : "",
-	"description" : "カスタムメイド3D2のボーン関連の補助機能を提供します",
+	"location" : "AddonDesc",
+	"description" : "",
 	"warning" : "",
 	"wiki_url" : "https://github.com/trzr/Blender-CM3D2-BoneUtil",
 	"tracker_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/issues",
@@ -15,58 +15,60 @@ bl_info = {
 if "bpy" in locals():
 	import imp
 
+	imp.reload(translations)
 	imp.reload(common)
 	imp.reload(bonedata_importer)
-	#imp.reload(bone_renamer)
+	imp.reload(bonetype_renamer)
 else:
+	from . import translations
 	from . import common
 	from . import bonedata_importer
-	#from . import bone_renamer
+	from . import bonetype_renamer
 
 import bpy, os.path, bpy.utils.previews
 
 # アドオン設定
 class AddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
-#	auto_update = bpy.props.BoolProperty(name="更新", description="自動更新：GihHubから最新版を取得", default=False )
-#
-#	def draw(self, context):
-#		self.layout.label(text="ここの設定は「ユーザー設定の保存」ボタンを押すまで保存されていません", icon='QUESTION')
+
+	bonetype_renamer = bpy.props.BoolProperty(name="ChangeBoneTypeFeature", description="ChangeBoneTypeFDesc", default=False )
+	#bone2mesh = bpy.props.BoolProperty(name="GenMeshFromBoneFeature", description="GenMeshFromBoneFDesc", default=False )
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label(text="PushSaveButton", icon='QUESTION')
+		box = layout.box()
+		box.label(text="EnableOption", icon='DOT')
+		row = box.row()
+		row.prop(self, 'bonetype_renamer', icon='NONE')
 
 
 def register():
 	bpy.utils.register_module(__name__)
+	bpy.app.translations.register(__name__, translations.dic)
 
 	bpy.types.DATA_PT_context_arm.append(bonedata_importer.menu_func_arm)
 	bpy.types.OBJECT_PT_context_object.append(bonedata_importer.menu_func)
 
-	#bpy.types.OBJECT_PT_context_object.append(bone_renamer.menu_func)
+	# bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
+	bonetype_renamer.register()
+
 
 	system = bpy.context.user_preferences.system
 	if not system.use_international_fonts:
 		system.use_international_fonts = True
 	if not system.use_translate_interface:
 		system.use_translate_interface = True
-	try:
-		import locale
-		if system.language == 'DEFAULT' and locale.getdefaultlocale()[0] != 'ja_JP':
-			system.language = 'en_US'
-	except: pass
 
-	try:
-		import locale
-		if locale.getdefaultlocale()[0] != 'ja_JP':
-			unregister()
-	except: pass
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
 
 	bpy.types.DATA_PT_context_arm.remove(bonedata_importer.menu_func_arm)
 	bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
-	#bpy.types.OBJECT_PT_context_object.remove(bone_renamer.menu_func)
+	# bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
+	bonetype_renamer.unregister()
 
 	bpy.app.translations.unregister(__name__)
-
 if __name__ == "__main__":
 	register()

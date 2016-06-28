@@ -20,3 +20,4 @@ parts/
 sdist/
 var/
 docs/
+Release/

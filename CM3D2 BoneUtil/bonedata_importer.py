@@ -19,10 +19,10 @@ def menu_func(self, context):
 	if bb_name is None: return
 
 	col = self.layout.column(align=True)
-	col.label(text="CM3D2用 BoneData取り込み", icon='IMPORT') #, icon_value=common.preview_collections['main']['KISS'].icon_id)
+	col.label(text="ImportBoneData4CM3D2", icon='IMPORT')
 	row = col.row(align=True)
-	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text="BoneData取り込み")
-#	row.operator('object.encode_cm3d2_vertex_group_names', icon_value=common.preview_collections['main']['KISS'].icon_id, text="Blender → CM3D2")
+	label = bpy.app.translations.pgettext("Import BoneData")
+	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
 
 def menu_func_arm(self, context):
 	ob = context.active_object
@@ -37,11 +37,10 @@ def menu_func_arm(self, context):
 	if bb_name is None: return
 
 	col = self.layout.column(align=True)
-	col.label(text="CM3D2用 BoneData取り込み", icon='IMPORT') #, icon_value=common.preview_collections['main']['KISS'].icon_id)
+	col.label(text="ImportBoneData4CM3D2", icon='IMPORT')
 	row = col.row(align=True)
-	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text="BoneData取り込み")
-#	row.operator('object.encode_cm3d2_vertex_group_names', icon_value=common.preview_collections['main']['KISS'].icon_id, text="Blender → CM3D2")
-
+	label = bpy.app.translations.pgettext("Import BoneData")
+	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
 
 class BoneData1(object):
 	def __init__(self, name, sclflag, parent_name, prop_name):
@@ -60,26 +59,26 @@ class BoneData1(object):
 
 class import_cm3d2_bonedata(bpy.types.Operator):
 	bl_idname = 'object.import_cm3d2_bonedata'
-	bl_label = "ボーン取り込み"
-	bl_description = "Blender上のボーンからCM3D2で使われるBoneDataに変換します"
+	bl_label = "Import BoneData"
+	bl_description = "ImportBoneDataDesc"
 	bl_options = {'REGISTER', 'UNDO'}
 
-	bb_name       = bpy.props.StringProperty(name="BaseBone名")
+	bb_name       = bpy.props.StringProperty(name="BaseBoneName")
 	target_items = [
-		('All', '全ボーン', "", '', 0),
-		('Selected', '選択ボーンのみ', "", '', 1),
-		('Descendent', '選択ボーン+子孫ボーン', "", '', 2),
+		('All', 'EnumAll', "", '', 0),
+		('Selected', 'EnumSelected', "", '', 1),
+		('Descendant', 'EnumDescendant', "", '', 2),
 	]
-	target_type   = bpy.props.EnumProperty(items=target_items, name="ターゲット", default='Descendent')
-	scale         = bpy.props.FloatProperty(name="スケール(倍率)", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="modelインポート時の拡大率を指定してください")
+	target_type   = bpy.props.EnumProperty(name="Target",items=target_items, default='Descendant')
+	scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="ScaleDesc")
 	import_bd     = bpy.props.BoolProperty(name="BoneData", default=True)
 	import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-	sync_bd       = bpy.props.BoolProperty(name="存在しないボーンのBoneData削除", default=False)
+	sync_bd       = bpy.props.BoolProperty(name="DeleteBoneDataNonExistent", default=False)
 
-	vg_opr = bpy.props.EnumProperty(name="頂点グループ",
+	vg_opr = bpy.props.EnumProperty(name="VertexGroup",
 			items=[
-				('add', '追加', "頂点グループを追加する", 'PLUS', 0),
-				('exist', '既存のみ使用', "既存の頂点グループのみ使用する", 'BLANK1', 1),
+				('add', 'Add', "AddVGDesc", 'PLUS', 0),
+				('exist', 'UseExist', "UseExistDesc", 'BLANK1', 1),
 			],
 			default='exist'
 		)
@@ -130,7 +129,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		self.layout.prop(self, 'target_type', icon='BONE_DATA')
 
 		self.layout.prop(self, 'scale', icon='MAN_SCALE')
-		self.layout.label(text="取り込み対象:", icon='IMPORT')
+		self.layout.label(text="ImportTarget:", icon='IMPORT')
 		row = self.layout.row(align=True)
 		row.prop(self, 'import_bd', icon='NONE')
 		row.prop(self, 'import_lbd', icon='NONE')
@@ -138,7 +137,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 
 		ob = context.active_object
 		if ob.type == 'MESH':
-			self.layout.label(text="頂点グループ:", icon='GROUP_VERTEX')
+			self.layout.label(text="VertexGroup:", icon='GROUP_VERTEX')
 			self.layout.prop(self, 'vg_opr', icon='NONE', expand=True)
 
 	def execute(self, context):
@@ -171,7 +170,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			if self.import_lbd:
 				self.lbd_idx = self.parse_localbonedata(self.lbd_dic)
 
-			if self.target_type == 'Descendent':
+			if self.target_type == 'Descendant':
 				for bone in self.target_bones:
 					if bone.select:
 						self.calc_bonedata(bone, True);
@@ -217,10 +216,10 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 
 
 		# 処理件数を出力する。BoneData数, LocalBoneData数
-		logmsg = "処理件数:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d)" % (len(self.treated_bones),
+		logmsg = "TargetCount:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d)" % (len(self.treated_bones),
 			self.count_bd_add, self.count_bd_update, count_bd_del,
 			self.count_lbd_add,self.count_lbd_update, count_lbd_del)
-		self.report(type={'INFO'}, message="BoneData取込み完了." + logmsg)
+		self.report(type={'INFO'}, message="ImportCompleted." + logmsg)
 		return {'FINISHED'}
 
 	def parse_bonedata(self, bd_dic):
