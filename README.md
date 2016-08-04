@@ -11,7 +11,9 @@
 　Blender2.76以上(動作確認は[2.77a](http://download.blender.org/release/Blender2.77/))がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
-　画面右の「[Download ZIP](https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip)」からファイルをダウンロード・解凍し、  
+　画面右の「[![ダウンロードボタン][img_download]][master zip]」か、  
+[Release](https://github.com/trzr/Blender-CM3D2-BoneUtil/releases)のリンク先にある該当該当のバージョン  
+からファイルをダウンロード・解凍し、  
 
 ```
  %APPDATA%\Blender Foundation\Blender\{Version}\scripts\addons\  

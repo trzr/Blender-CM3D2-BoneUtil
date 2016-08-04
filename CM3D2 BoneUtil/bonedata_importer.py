@@ -242,7 +242,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			node.rot = bdlist[4]
 			bd_dic[node.name] = node
 			if bone_name not in self.target_bones:
-				node.no_exist = True
+				if bone_name != self.bb_name: # BaseBone名はスキップ
+					node.no_exist = True
 
 		for node in bd_dic.values():
 			if node.has_parent:
