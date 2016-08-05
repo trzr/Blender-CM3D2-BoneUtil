@@ -73,7 +73,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="ScaleDesc")
 	import_bd     = bpy.props.BoolProperty(name="BoneData", default=True)
 	import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-	sync_bd       = bpy.props.BoolProperty(name="DeleteBoneDataNonExistent", default=False)
+	sync_bd       = bpy.props.BoolProperty(name="RemoveBoneDataNonExistent", default=False)
+	exclude_ikbd  = bpy.props.BoolProperty(name="ExcludeIKBoneDataForRemove", default=True)
 
 	vg_opr = bpy.props.EnumProperty(name="VertexGroup",
 			items=[
@@ -134,6 +135,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		row.prop(self, 'import_bd', icon='NONE')
 		row.prop(self, 'import_lbd', icon='NONE')
 		self.layout.prop(self, 'sync_bd', icon='ERROR')
+		self.layout.prop(self, 'exclude_ikbd', icon='NONE')
 
 		ob = context.active_object
 		if ob.type == 'MESH':
@@ -186,13 +188,14 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			if self.sync_bd:
 				for bdata1 in self.bonedata_dic.values():
 					if bdata1.no_exist:
-						del self.target_props[ bdata1.prop_name ]
-						count_bd_del += 1
+						if not self.exclude_ikbd or not bdata1.name.startswith('_IK_'):
+							del self.target_props[ bdata1.prop_name ]
+							count_bd_del += 1
 
-						lbdata1 = self.lbd_dic.get(bdata1.name)
-						if lbdata1:
-							del self.target_props[ lbdata1[1] ]
-							count_lbd_del += 1
+							lbdata1 = self.lbd_dic.get(bdata1.name)
+							if lbdata1:
+								del self.target_props[ lbdata1[1] ]
+								count_lbd_del += 1
 
 				# 歯抜けのBoneData/LocalBoneDataを修正
 				if count_bd_del > 0:
