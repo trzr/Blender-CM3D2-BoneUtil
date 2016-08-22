@@ -1,7 +1,7 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 1, 2),
+	"version" : (0, 1, 5),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
 	"description" : "",
@@ -41,6 +41,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		box.label(text="EnableOption", icon='DOT')
 		row = box.row()
 		row.prop(self, 'bonetype_renamer', icon='NONE')
+		row.prop(self, 'bone2mesh', icon='NONE')
 
 
 def register():
@@ -52,6 +53,8 @@ def register():
 
 	# bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
 	bonetype_renamer.register()
+	bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
+	bpy.types.DATA_PT_context_arm.append(bonetype_renamer.menu_func_arm)
 
 
 	system = bpy.context.user_preferences.system
@@ -67,6 +70,9 @@ def unregister():
 	bpy.types.DATA_PT_context_arm.remove(bonedata_importer.menu_func_arm)
 	bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
 	# bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
+
+	bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
+	bpy.types.DATA_PT_context_arm.remove(bonetype_renamer.menu_func_arm)
 	bonetype_renamer.unregister()
 
 	bpy.app.translations.unregister(__name__)

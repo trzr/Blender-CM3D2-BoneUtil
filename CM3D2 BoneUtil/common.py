@@ -12,7 +12,7 @@ def remove_serial_num(name):
 pt_includeNum = re.compile('.*(0[1-9]|1[0-2]).*')
 def parse_bonetype(name):
 	if '_skirt_' in name:
-		if pt_includeNum.match(name):
+		if pt_includeNum.match(remove_serial_num(name)):
 			if '_h_' in name:	return 'skirt_h'
 			else            :	return 'skirt'
 	elif '_yure_hair_' in name:
