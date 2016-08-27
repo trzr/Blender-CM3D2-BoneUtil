@@ -240,7 +240,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		return {'FINISHED'}
 	
 	def parse_bonedata(self):
-		lbd_dic = {}
+		lbd_dic0 = {}
 		#BoneData = namedtuple('bonedata', ['name', 'sclflag', 'parent_name', 'prop_name', 'is_nub', 'has_parent', 'children', 'co', 'rot', 'parent'])
 		
 		max_bd_idx = 0
@@ -276,7 +276,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 					bdlist = lbd_txt.split(',')
 					if len(bdlist) < 2 : continue
 					
-					lbd_dic[bdlist[0]] = (prop_name, bdlist[1])
+					lbd_dic0[bdlist[0]] = (prop_name, bdlist[1])
 				except:
 					pass
 		
@@ -288,7 +288,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 					node.parent = parent
 		
 		i = 0
-		for lbd_item in lbd_dic.items():
+		for lbd_item in lbd_dic0.items():
 			exist_bd = lbd_item[0] in self.bd_dic
 			# (index, prop_name, bone_name, exist_bd
 			self.lbd_dic[lbd_item[0]] = (i, lbd_item[1][0], lbd_item[1][1], exist_bd)

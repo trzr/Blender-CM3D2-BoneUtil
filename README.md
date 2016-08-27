@@ -40,6 +40,11 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM
 ### ◇ [揺れボーンタイプ 一括変更機能](https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Change%20BoneType)（オプション）  
 　揺れボーンの型を一括で変更する機能
 
+### ◇ [シェイプキー値反映機能](https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BlendsetImporter)
+　blendsetを元に、シェイプキーの値を一括で変更する機能
+
+
+
 ## ■ 免責
   本アドオンの使用または使用不能から生じるいかなる損害について、作者は一切の責任を負えません。  
   各自の責任において使用してください。
