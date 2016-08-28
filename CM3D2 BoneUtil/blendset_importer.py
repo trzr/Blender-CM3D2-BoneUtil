@@ -7,21 +7,21 @@ def menu_func(self, context):
 	if ob.data.shape_keys is None: return
 	
 	box = self.layout.box()
-	box.label(text="shapekey.BatchOperation")
+	box.label(text="shapekey.BatchOperation", icon='HAND')
 	#row = box.split(percentage=0.3)
 	col = box.column(align=True)
 	
 	row = col.split(percentage=0.5)
 	sub_row1 = row.row(align=True)
-	label = bpy.app.translations.pgettext("shapekey.CopySet")
+	label = bpy.app.translations.pgettext('shapekey.CopySet')
 	sub_row1.operator('shapekey.copy_blendsets', icon='COPYDOWN', text=label)
-	label = bpy.app.translations.pgettext("shapekey.PasteSet")
+	label = bpy.app.translations.pgettext('shapekey.PasteSet')
 	sub_row1.operator('shapekey.paste_blendsets', icon='PASTEDOWN', text=label)
 	
 	sub_row2 = row.row(align=True)
-	label = bpy.app.translations.pgettext("shapekey.CopyValue")
+	label = bpy.app.translations.pgettext('shapekey.CopyValue')
 	sub_row2.operator('shapekey.copy_blendset', icon='COPYDOWN', text=label)
-	label = bpy.app.translations.pgettext("shapekey.PasteValue")
+	label = bpy.app.translations.pgettext('shapekey.PasteValue')
 	sub_row2.operator('shapekey.paste_blendset', icon='PASTEDOWN', text=label)
 	
 	has_target = False
@@ -61,9 +61,9 @@ def menu_func(self, context):
 			row1 = col.row(align=True)
 			split1 = row1.split(percentage=0.6, align=True)
 			split1.prop(bsl, "target_name", text="")
-			label = bpy.app.translations.pgettext("shapekey.Reflect")
+			label = bpy.app.translations.pgettext('shapekey.Reflect')
 			split1.operator('shapekey.reflect_blendset', icon='MOVE_DOWN_VEC', text=label)
-			label = bpy.app.translations.pgettext("shapekey.Regist")
+			label = bpy.app.translations.pgettext('shapekey.Regist')
 			split1.operator('shapekey.regist_blendset', icon='MOVE_UP_VEC', text=label)
 		
 def refresh_list(self, context, bs_list, target_props):
@@ -134,7 +134,7 @@ class paste_blendsets(bpy.types.Operator):
 			else:
 				idx += 1
 		
-		# 最後の要素を追加
+		# 
 		if len(kv_list) > 0:
 			text = ''
 			for kv in kv_list:
@@ -250,6 +250,7 @@ class regist_blendset(bpy.types.Operator):
 		ob = context.active_object
 		key_blocks = ob.data.shape_keys.key_blocks
 		
+		output_text = ""
 		for key, key_block in key_blocks.items():
 			key_val = float(key_block.value*100)
 			if key_val > 0:

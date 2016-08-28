@@ -1,7 +1,7 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 2, 0),
+	"version" : (0, 2, 1),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
 	"description" : "",
