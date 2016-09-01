@@ -8,21 +8,20 @@ def menu_func(self, context):
 	
 	box = self.layout.box()
 	box.label(text="shapekey.BatchOperation", icon='HAND')
-	#row = box.split(percentage=0.3)
-	col = box.column(align=True)
 	
-	row = col.split(percentage=0.5)
-	sub_row1 = row.row(align=True)
+	# row = box.split(percentage=0.005)
+	# row.label(text='') # indent
+	
+	col = box.column()
+	#row = col.split(percentage=0.5)
+	sub_row1 = col.row(align=True)
+	sub_row1.label(text='shapekey.BlendsetOpeation')
 	label = bpy.app.translations.pgettext('shapekey.CopySet')
 	sub_row1.operator('shapekey.copy_blendsets', icon='COPYDOWN', text=label)
 	label = bpy.app.translations.pgettext('shapekey.PasteSet')
 	sub_row1.operator('shapekey.paste_blendsets', icon='PASTEDOWN', text=label)
-	
-	sub_row2 = row.row(align=True)
-	label = bpy.app.translations.pgettext('shapekey.CopyValue')
-	sub_row2.operator('shapekey.copy_blendset', icon='COPYDOWN', text=label)
-	label = bpy.app.translations.pgettext('shapekey.PasteValue')
-	sub_row2.operator('shapekey.paste_blendset', icon='PASTEDOWN', text=label)
+	label = bpy.app.translations.pgettext('shapekey.ClearSet')
+	sub_row1.operator('shapekey.clear_blendsets', icon='X', text=label)
 	
 	has_target = False
 	ob = context.active_object
@@ -32,40 +31,57 @@ def menu_func(self, context):
 				has_target = True
 				break
 	
-	if has_target:
-		bsl = context.window_manager.blendset_list
-		refresh_list(self, context, bsl, ob.data)
+	#if has_target:
+	bsl = context.window_manager.blendset_list
+	refresh_list(self, context, bsl, ob.data)
+	
+	split = col.split(percentage=0.15, align=True)
+	if bsl.display_list:
+		split.prop(bsl, "display_list", text="", icon='TRIA_DOWN')
+	else:
+		split.prop(bsl, "display_list", text="", icon='TRIA_RIGHT')
+	
+	sub_row = split.row()
+	bs_count = len(bsl.blendset_items)
+	sub_row.label(text="shapekey.BlendsetList", icon='SHAPEKEY_DATA')
+	subsub_row = sub_row.row()
+	subsub_row.alignment = 'RIGHT'
+	subsub_row.label(text=str(bs_count), icon='CHECKBOX_HLT')
+	
+	if bsl.display_list:
+		row = col.row(align=True)
+		col1 = row.column(align=True)
+		col1.template_list("BlendsetList", "", bsl, "blendset_items", bsl, "item_idx", rows=2)
 		
-		split = col.split(percentage=0.85, align=True)
-		sub_row = split.row()
-		bs_count = len(bsl.blendset_items)
-		sub_row.label(text="shapekey.BlendsetList", icon='SHAPEKEY_DATA')
-		subsub_row = sub_row.row()
-		subsub_row.alignment = 'RIGHT'
-		subsub_row.label(text=str(bs_count), icon='CHECKBOX_HLT')
-		if bsl.display_list:
-			split.prop(bsl, "display_list", text="", icon='TRIA_DOWN')
-		else:
-			split.prop(bsl, "display_list", text="", icon='TRIA_LEFT')
-		
-		if bsl.display_list:
-			row = col.row(align=True)
-			col1 = row.column(align=True)
-			col1.template_list("BlendsetList", "", bsl, "blendset_items", bsl, "item_idx", rows=2)
-			
+		if bsl.item_idx != bsl.prev_idx:
 			if bsl.item_idx >= 0 and bsl.item_idx < bs_count:
 				bsl.target_name = bsl.blendset_items[bsl.item_idx].name
 			else:
 				bsl.target_name = ""
-			
-			row1 = col.row(align=True)
-			split1 = row1.split(percentage=0.6, align=True)
-			split1.prop(bsl, "target_name", text="")
-			label = bpy.app.translations.pgettext('shapekey.Reflect')
-			split1.operator('shapekey.reflect_blendset', icon='MOVE_DOWN_VEC', text=label)
-			label = bpy.app.translations.pgettext('shapekey.Regist')
-			split1.operator('shapekey.regist_blendset', icon='MOVE_UP_VEC', text=label)
+			bsl.prev_idx = bsl.item_idx
 		
+		row1 = col.row(align=True)
+		split1 = row1.split(percentage=0.6, align=True)
+		split1.prop(bsl, "target_name", text="")
+		label = bpy.app.translations.pgettext('shapekey.Reflect')
+		split1.operator('shapekey.reflect_blendset', icon='MOVE_DOWN_VEC', text=label)
+		label = bpy.app.translations.pgettext('shapekey.Regist')
+		split1.operator('shapekey.regist_blendset', icon='MOVE_UP_VEC', text=label)
+		
+		subsplit = split1.split(percentage=0.5, align=True)
+		subsplit.operator('shapekey.add_blendset', icon='ZOOMIN', text='')
+		subsplit.operator('shapekey.del_blendset', icon='ZOOMOUT', text='')
+	
+	# bottom
+	col = col.column()
+	row = col.row(align=True)
+	row.label(text='shapekey.ShapeKeyVal')
+	label = bpy.app.translations.pgettext('shapekey.CopyValue')
+	row.operator('shapekey.copy_blendset', icon='COPYDOWN', text=label)
+	label = bpy.app.translations.pgettext('shapekey.PasteValue')
+	row.operator('shapekey.paste_blendset', icon='PASTEDOWN', text=label)
+	
+
 def refresh_list(self, context, bs_list, target_props):
 	bs_list.blendset_items.clear()
 	for propkey in target_props.keys():
@@ -80,7 +96,7 @@ class paste_blendsets(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		ob = context.active_object
 		if ob and ob.type == 'MESH':
 			clipboard = context.window_manager.clipboard
@@ -153,7 +169,7 @@ class copy_blendsets(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		ob = context.active_object
 		if ob and ob.type == 'MESH':
 			for prop_key in ob.data.keys():
@@ -182,6 +198,33 @@ class copy_blendsets(bpy.types.Operator):
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
+class clear_blendsets(bpy.types.Operator):
+	bl_idname = 'shapekey.clear_blendsets'
+	bl_label       = bpy.app.translations.pgettext('shapekey.ClearBlendsets')
+	bl_description = bpy.app.translations.pgettext('shapekey.ClearBlendsets.Desc')
+	bl_options = {'REGISTER', 'UNDO'}
+	
+	@classmethod
+	def poll(self, context):
+		ob = context.active_object
+		if ob and ob.type == 'MESH':
+			for prop_key in ob.data.keys():
+				if prop_key.startswith('blendset:'):
+					return True
+		return False
+	
+	def execute(self, context):
+		ob = context.active_object
+		props = ob.data
+		
+		for prop_key in props.keys():
+			if prop_key.startswith('blendset:'):
+				del props[prop_key]
+		
+		msg = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Finished')
+		self.report(type={'INFO'}, message=msg)
+		return {'FINISHED'}
+
 class reflect_blendset(bpy.types.Operator):
 	bl_idname = 'shapekey.reflect_blendset'
 	bl_label       = bpy.app.translations.pgettext('shapekey.ReflectBlendset')
@@ -189,7 +232,7 @@ class reflect_blendset(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		ob = context.active_object
 		if ob and ob.type == 'MESH':
 			bsl = context.window_manager.blendset_list
@@ -235,7 +278,7 @@ class regist_blendset(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		ob = context.active_object
 		if ob and ob.type == 'MESH':
 			bsl = context.window_manager.blendset_list
@@ -261,6 +304,66 @@ class regist_blendset(bpy.types.Operator):
 		self.report(type={'INFO'}, message=msg % target_name)
 		return {'FINISHED'}
 
+class add_blendset(bpy.types.Operator):
+	bl_idname = 'shapekey.add_blendset'
+	bl_label       = bpy.app.translations.pgettext('shapekey.AddBlendset')
+	bl_description = bpy.app.translations.pgettext('shapekey.AddBlendset.Desc')
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(self, context):
+		ob = context.active_object
+		if ob and ob.type == 'MESH':
+			bsl = context.window_manager.blendset_list
+			if len(bsl.target_name) > 0 and not bsl.target_name in bsl.blendset_items:
+				return True
+		return False
+	
+	def execute(self, context):
+		bsl = context.window_manager.blendset_list
+		target_name = bsl.target_name
+		
+		ob = context.active_object
+		key_blocks = ob.data.shape_keys.key_blocks
+		
+		output_text = ""
+		for key, key_block in key_blocks.items():
+			key_val = float(key_block.value*100)
+			if key_val > 0:
+				output_text += key + " {0:g},".format(key_val)
+		ob.data['blendset:' + target_name] = output_text
+		
+		msg = bpy.app.translations.pgettext('shapekey.AddBlendset.Finished')
+		self.report(type={'INFO'}, message=msg % target_name)
+		return {'FINISHED'}
+
+class del_blendset(bpy.types.Operator):
+	bl_idname = 'shapekey.del_blendset'
+	bl_label       = bpy.app.translations.pgettext('shapekey.DelBlendset')
+	bl_description = bpy.app.translations.pgettext('shapekey.DelBlendset.Desc')
+	bl_options = {'REGISTER', 'UNDO'}
+	
+	@classmethod
+	def poll(self, context):
+		ob = context.active_object
+		if ob and ob.type == 'MESH':
+			bsl = context.window_manager.blendset_list
+			if len(bsl.target_name) > 0 and bsl.target_name in bsl.blendset_items:
+				return True
+		return False
+	
+	def execute(self, context):
+		bsl = context.window_manager.blendset_list
+		target_name = bsl.target_name
+		
+		ob = context.active_object
+		
+		del ob.data['blendset:' + target_name]
+		
+		msg = bpy.app.translations.pgettext('shapekey.DelBlendset.Finished')
+		self.report(type={'INFO'}, message=msg % target_name)
+		return {'FINISHED'}
+
 class paste_blendset(bpy.types.Operator):
 	bl_idname = 'shapekey.paste_blendset'
 	bl_label       = bpy.app.translations.pgettext('shapekey.PasteBlendset')
@@ -268,7 +371,7 @@ class paste_blendset(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		data = context.window_manager.clipboard
 		if 'blendset' in data:
 			return False
@@ -316,7 +419,7 @@ class copy_blendset(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
-	def poll(cls, context):
+	def poll(self, context):
 		ob = context.active_object
 		shape_keys = ob.data.shape_keys
 		
@@ -350,6 +453,7 @@ class BlendsetList(bpy.types.UIList):
 class Blendsets(bpy.types.PropertyGroup):
 	blendset_items = bpy.props.CollectionProperty(type=BlendsetItem)
 	item_idx       = bpy.props.IntProperty()
+	prev_idx       = bpy.props.IntProperty()
 	target_name    = bpy.props.StringProperty()
 	display_list   = bpy.props.BoolProperty(name = "Blendset List",
 		description = "Display Blendset List",

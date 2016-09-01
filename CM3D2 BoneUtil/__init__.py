@@ -1,12 +1,12 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 2, 1),
+	"version" : (0, 2, 3),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
 	"description" : "",
 	"warning" : "",
-	"wiki_url" : "https://github.com/trzr/Blender-CM3D2-BoneUtil",
+	"wiki_url" : "https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki",
 	"tracker_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/issues",
 	"category" : "Tools"
 }
@@ -21,6 +21,7 @@ if "bpy" in locals():
 	imp.reload(bonetype_renamer)
 	
 	imp.reload(blendset_importer)
+	imp.reload(addon_updater)
 else:
 	from . import translations
 	from . import common
@@ -28,6 +29,7 @@ else:
 	from . import bonetype_renamer
 	
 	from . import blendset_importer
+	from . import addon_updater
 
 import bpy, os.path, bpy.utils.previews
 
@@ -38,6 +40,10 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bonetype_renamer = bpy.props.BoolProperty(name="ChangeBoneTypeFeature", description="ChangeBoneTypeFDesc", default=False )
 	#bone2mesh = bpy.props.BoolProperty(name="GenMeshFromBoneFeature", description="GenMeshFromBoneFDesc", default=False )
 	
+	update_history = addon_updater.VersionHistory()
+	update_history.now_ver = [ v for v in bl_info['version'] ]
+	version = '.'.join( [ str(v) for v in bl_info['version'] ] )
+	
 	def draw(self, context):
 		layout = self.layout
 		layout.label(text="PushSaveButton", icon='QUESTION')
@@ -46,8 +52,17 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		row = box.row()
 		row.prop(self, 'bonetype_renamer', icon='NONE')
 		row.prop(self, 'bone2mesh', icon='NONE')
-
-
+		
+		row = layout.row()
+		#row.label(self, 'version', icon='INFO')
+		row.menu('INFO_MT_CM3D2_BoneUtil_history', icon='INFO')
+		
+		v = self.version
+		if self.update_history.has_update(): 
+			v += ' => ' + self.update_history.latest_version
+		row.label(text=v)
+		row.operator('script.update_cm3d2_boneutil', icon='FILE_REFRESH')
+	
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.app.translations.register(__name__, translations.dic)

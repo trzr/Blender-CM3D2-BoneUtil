@@ -110,7 +110,7 @@ class BoneListSelectItemOperator(bpy.types.Operator):
 	bl_label  = "Select Item"
 	
 	opr_type = bpy.props.StringProperty(default='')
-
+	
 	def execute(self, context):
 		ui_list = context.window_manager.my_bone_list
 		if self.opr_type == 'SELECT_ALL':
@@ -167,7 +167,7 @@ class ChangeBoneTypeOperator(bpy.types.Operator):
 	count_lbd_replace = 0
 	count_bd_replace = 0
 	count_bdp_replace = 0
-
+	
 	def create_rename_list(self, context):
 		ui_list = context.window_manager.my_bone_list
 		target_type = ui_list.target_type
@@ -178,7 +178,7 @@ class ChangeBoneTypeOperator(bpy.types.Operator):
 				replaced = common.replace_bonename(bone.name, bone.bone_type, target_type)
 				rename_list.append( (bone.name, replaced) )
 		return rename_list
-
+	
 	def execute(self, context):
 		rename_list = self.create_rename_list(context)
 		
@@ -269,74 +269,11 @@ class YureBoneList(bpy.types.UIList):
 		split.label(text=item.name, translate=False, icon='BONE_DATA' )
 		split.label(text=item.bone_type, translate=False, icon='NONE')
 
-# class UIListTestPanel(bpy.types.Panel):
-# 	bl_label = "Bone List"
-# 	bl_idname = "PROPERTIES_ui_list_test"
-# 	bl_space_type = "PROPERTIES"
-# 	bl_context="object"
-# 	bl_region_type = "WINDOW"
-# 
-# 	@classmethod
-# 	def poll(self, context):
-# 		if not common.prefs().bonetype_renamer: return False
-# 
-# 		ob = context.active_object
-# 		if not ob or ob.type != 'MESH': return False
-# 
-# 		if ob.parent is None or ob.parent.type != 'ARMATURE': return False
-# 		if len(ob.parent.data.bones) == 0: return False
-# 
-# 		ui_list = context.window_manager.my_bone_list
-# 		refresh_bonelist(self, context, ui_list, ob.parent.data.bones)
-# 		if len(ui_list.yure_bones) == 0: return False
-# 		return True
-# 
-# 	def draw(self, context):
-# 		layout = self.layout
-# 		ybl = context.window_manager.yure_bone_list
-# 
-# 		row = layout.row()
-# 		col = row.column()
-# 		split = col.split(percentage=0.15, align=True)
-# 		if ybl.display_ybl:
-# 			split.prop(ybl, "display_ybl", text="", icon='DOWNARROW_HLT')
-# 		else:
-# 			split.prop(ybl, "display_ybl", text="", icon='RIGHTARROW')
-# 		# split.operator("mesh.looptools_bridge", text="Loft").loft = True
-# 		split.label(text="Change BoneType", icon='IMPORT')
-# 		# ListView
-# 		if ybl.display_ybl:
-# 			ui_list = context.window_manager.my_bone_list
-# 			col.template_list("YureBoneList", "", ui_list, "yure_bones", ui_list, "item_idx", rows=2)
-# 
-# 			col = row.column(align=True)
-# 			col.operator("custom.yurebonelist_select_all", icon='ZOOMIN', text="")
-# 			col.operator("custom.yurebonelist_deselect_all", icon='ZOOMOUT', text="")
-# 
-# 			row = layout.row()
-# 			col = row.column(align=True)
-# 			col.prop(ui_list, 'target_type', icon='BONE_DATA')
-# 			# TODO filter
-# 			#if len(ui_list.yure_bones):
-# 			#	row = layout.row()
-# 			#	row.prop(ui_list.yure_bones[ui_list.item_idx], "name")
-# 			# 	row = layout.row()
-# 			# 	row.prop(ui_list.yure_bones[ui_list.item_idx], "selected")
-# 			row = layout.row()
-# 			label = bpy.app.translations.pgettext('ChangeBoneType')
-# 			row.operator("custom.change_bonetype", text=label)
-
 class YureBoneProps(bpy.types.PropertyGroup):
 	display_ybl = bpy.props.BoolProperty(name = "Bones List",
 		description = "Display Yure Bone List",
 		default = False)
 
-# # bridge operator
-# class Bridge(bpy.types.Operator):
-#     bl_idname = 'mesh.looptools_bridge'
-#     bl_label = "Bridge / Loft"
-#     bl_description = "Bridge two, or loft several, loops of vertices"
-#     bl_options = {'REGISTER', 'UNDO'}
 # -------------------------------------------------------------------
 # register
 # -------------------------------------------------------------------
