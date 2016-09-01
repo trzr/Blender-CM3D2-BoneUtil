@@ -125,7 +125,7 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 		diff_seconds = 1000
 
 		hist = common.prefs().update_history
-		now = datetime.datetime.now()
+		now = datetime.datetime.utcnow()
 		if hist.updated_time:
 			diff_seconds = (now - hist.updated_time).seconds
 		if diff_seconds > 600:

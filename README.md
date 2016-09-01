@@ -11,9 +11,8 @@
 　Blender2.76以上(動作確認は[2.77a][blender277])がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
-　[Release][]のリンク先にある該当該当のバージョンか、
-画面右の[Download ZIP][master_zip]  
-からファイルをダウンロード・解凍し、  
+　[Releases][]のリンク先にある該当該当のバージョンか、
+画面右の[Download ZIP][master_zip]からファイルをダウンロード・解凍し、  
 
 ```
  %APPDATA%\Blender Foundation\Blender\{Version}\scripts\addons\  
@@ -57,7 +56,7 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM
 [CM3D2 Converter]:https://github.com/CM3Duser/Blender-CM3D2-Converter
 [blender277]:http://download.blender.org/release/Blender2.77/
 [master_zip]:https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip
-[Release]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
+[Releases]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
 [BoneImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Import%20To%20BoneData
 [ChangeBoneType]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Change%20BoneType
 [BlendsetImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BlendsetImporter
