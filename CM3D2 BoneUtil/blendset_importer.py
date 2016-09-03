@@ -5,15 +5,22 @@ def menu_func(self, context):
 	ob = context.active_object
 	if not ob or ob.type != 'MESH': return
 	if ob.data.shape_keys is None: return
+
+	if not common.prefs().bsimp: return
 	
+	bsl = context.window_manager.blendset_list
 	box = self.layout.box()
-	box.label(text="shapekey.BatchOperation", icon='HAND')
+	col = box.column()
+	split = col.split(percentage=0.14, align=True)
+	if bsl.display_box:
+		split.prop(bsl, "display_box", text="", icon='TRIA_DOWN')# icon='DOWNARROW_HLT')
+	else:
+		split.prop(bsl, "display_box", text="", icon='TRIA_RIGHT')
+	split.label(text="shapekey.BatchOperation", icon='HAND')
 	
-	# row = box.split(percentage=0.005)
-	# row.label(text='') # indent
+	if not bsl.display_box: return
 	
 	col = box.column()
-	#row = col.split(percentage=0.5)
 	sub_row1 = col.row(align=True)
 	sub_row1.label(text='shapekey.BlendsetOpeation')
 	label = bpy.app.translations.pgettext('shapekey.CopySet')
@@ -32,10 +39,9 @@ def menu_func(self, context):
 				break
 	
 	#if has_target:
-	bsl = context.window_manager.blendset_list
 	refresh_list(self, context, bsl, ob.data)
 	
-	split = col.split(percentage=0.15, align=True)
+	split = col.split(percentage=0.1, align=True)
 	if bsl.display_list:
 		split.prop(bsl, "display_list", text="", icon='TRIA_DOWN')
 	else:
@@ -189,8 +195,9 @@ class copy_blendsets(bpy.types.Operator):
 				for val in propval.split(','):
 					if len(val) > 2:
 						entry = val.split(' ')
-						output_text += "\t" + entry[0] + "\n"
-						output_text += "\t" + entry[1] + "\n"
+						if len(entry) >= 2:
+							output_text += "\t" + entry[0] + "\n"
+							output_text += "\t" + entry[1] + "\n"
 				output_text += "\n"
 		
 		context.window_manager.clipboard = output_text
@@ -457,6 +464,10 @@ class Blendsets(bpy.types.PropertyGroup):
 	target_name    = bpy.props.StringProperty()
 	display_list   = bpy.props.BoolProperty(name = "Blendset List",
 		description = "Display Blendset List",
+		default = False)
+	
+	display_box   = bpy.props.BoolProperty(name = "display_box",
+		description = "",
 		default = False)
 
 # -------------------------------------------------------------------

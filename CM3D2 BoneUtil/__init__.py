@@ -1,7 +1,7 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 2, 4),
+	"version" : (0, 2, 5),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
 	"description" : "",
@@ -39,6 +39,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	
 	bonetype_renamer = bpy.props.BoolProperty(name="ChangeBoneTypeFeature", description="ChangeBoneTypeFDesc", default=False )
 	#bone2mesh = bpy.props.BoolProperty(name="GenMeshFromBoneFeature", description="GenMeshFromBoneFDesc", default=False )
+	bsimp = bpy.props.BoolProperty(name="shapekey.BsImporterFeature", description="shapekey.BsImporterFDesc", default=True )
 	
 	update_history = addon_updater.VersionHistory()
 	update_history.now_ver = [ v for v in bl_info['version'] ]
@@ -50,8 +51,10 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		box = layout.box()
 		box.label(text="EnableOption", icon='DOT')
 		row = box.row()
-		row.prop(self, 'bonetype_renamer', icon='NONE')
-		row.prop(self, 'bone2mesh', icon='NONE')
+		split = row.split(percentage=0.3, align=True)
+		split.prop(self, 'bonetype_renamer', icon='NONE')
+		split.prop(self, 'bsimp', icon='NONE')
+		#split.prop(self, 'bone2mesh', icon='NONE')
 		
 		row = layout.row()
 		#row.label(self, 'version', icon='INFO')

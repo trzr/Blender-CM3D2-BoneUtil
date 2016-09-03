@@ -60,7 +60,7 @@ class VersionHistory:
 	titles = []
 	updates = []
 	links = []
-	last_ver_date = None
+	#last_ver_date = None
 	now_ver = []
 	latest_ver = []
 	latest_version = ''
@@ -125,7 +125,7 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 		diff_seconds = 1000
 
 		hist = common.prefs().update_history
-		now = datetime.datetime.utcnow()
+		now = datetime.datetime.now()
 		if hist.updated_time:
 			diff_seconds = (now - hist.updated_time).seconds
 		if diff_seconds > 600:
@@ -134,10 +134,11 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 			except TypeError:
 				self.layout.label(text=bpy.app.translations.pgettext('updater.History'), icon='ERROR')
 				return
-		
+
+		utcnow = datetime.datetime.utcnow()
 		count = 0
 		for title, update, link in zip(hist.titles, hist.updates, hist.links):
-			diff_seconds = now - update
+			diff_seconds = utcnow - update
 			icon = 'SORTTIME'
 			if 7 < diff_seconds.days:
 				icon = 'NLA'
@@ -163,4 +164,4 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 			self.layout.operator('wm.url_open', text=text, icon=icon).url = link[0]
 			count += 1
 
-		self.layout.label(text=bpy.app.translations.pgettext('updater.HistoryUpdated:') + hist.updated_time.strftime('%Y-%m-%dT%H:%M:%S'))
+		self.layout.label(text=bpy.app.translations.pgettext('updater.HistoryUpdated:') + hist.updated_time.strftime('%Y-%m-%d %H:%M:%S'))
