@@ -73,17 +73,35 @@ def refresh_bonelist(self, context, ui_list, target_bones):
 	for bone in ui_list.yure_bones:
 		selected_dic[bone.name] = bone.selected
 	
+	bone_names = None
 	ui_list.yure_bones.clear()
 	for bone in target_bones:
 		if '_yure_' in bone.name:
+			
+			if bone_names is None: bone_names = parse_bone_names(self, context)
+			
 			bone_type = common.parse_bonetype(bone.name)
-			if bone_type != None:
+			if bone_type != None and bone.name in bone_names:
 				item = ui_list.yure_bones.add()
 				item.name = bone.name
 				item.bone_type = bone_type
 				
 				item.selected = selected_dic[bone.name] if (bone.name in selected_dic) else False
 
+def parse_bone_names(self, context):
+	bone_names = set()
+	if context.active_object.type == 'MESH':
+		target_props = context.active_object
+	else: # ARMATURE
+		target_props = context.active_object.data
+	
+	for item in target_props.items():
+		prop_name, prop_val = item[0], item[1]
+		if prop_name.startswith('BoneData:'):
+			bd = prop_val.split(',', 1)
+			bone_names.add(bd[0])
+	return bone_names
+	
 class YureBoneItem(bpy.types.PropertyGroup):
 	name = bpy.props.StringProperty()
 	selected = bpy.props.BoolProperty()
@@ -193,7 +211,7 @@ class ChangeBoneTypeOperator(bpy.types.Operator):
 			if rename_item[1] in target_bones:
 				msg = 'bone rename failed. already exist:%s' % rename_item[1]
 				self.report(type={'ERROR'}, message=msg)
-				return {'CANCEL'}
+				return {'CANCELLED'}
 		
 		for rename_item in rename_list:
 			try:
