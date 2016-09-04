@@ -294,9 +294,9 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.lbd_dic[lbd_item[0]] = (i, lbd_item[1][0], lbd_item[1][1], exist_bd)
 			i += 1
 		
-		self.bonedata_idx = max_bd_idx
-		self.lbd_idx = max_lbd_idx
-	
+		self.bonedata_idx = max_bd_idx+1
+		self.lbd_idx = max_lbd_idx+1
+
 	# BoneData整頓
 	def reorder_props(self, prefix):
 		change_items = []
@@ -445,8 +445,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 					self.target_props[add_prop_name] = string_bone_nub
 					self.treated_bones.add(nub_bonename)
 		
-		# LocalBoneData (末端ノードでない場合限定)
-		if self.import_lbd and not is_nub:
+		# LocalBoneData (末端ノードとBaseBoneを除く)
+		if self.import_lbd and not is_nub and self.bb_name != bone_name:
 			lbd_skip = False
 			if self.is_mesh:
 				if bone_name not in self.target_props.vertex_groups:
