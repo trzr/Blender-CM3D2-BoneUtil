@@ -1,6 +1,6 @@
-import os, sys, bpy, math, mathutils
+import os, sys, bpy, math, mathutils, struct, tempfile
 from . import common
-# メニュー等に項目追加
+
 def menu_func(self, context):
 	ob = context.active_object
 	if not ob or ob.type != 'MESH': return
@@ -21,6 +21,13 @@ def menu_func(self, context):
 	if not bsl.display_box: return
 	
 	col = box.column()
+	sub_row1 = col.row(align=True)
+	sub_row1.label(text='.menu 連携')
+	label = 'インポート'
+	sub_row1.operator('shapekey.import_cm3d2_menu', icon='IMPORT', text=label)
+	label = 'エクスポート'
+	sub_row1.operator('shapekey.export_cm3d2_menu', icon='EXPORT', text=label)
+	
 	sub_row1 = col.row(align=True)
 	sub_row1.label(text='shapekey.BlendsetOpeation')
 	label = bpy.app.translations.pgettext('shapekey.CopySet')
@@ -448,6 +455,279 @@ class copy_blendset(bpy.types.Operator):
 		msg = bpy.app.translations.pgettext('shapekey.PasteBlendset.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
+		
+class import_cm3d2_menu(bpy.types.Operator):
+	bl_idname = 'shapekey.import_cm3d2_menu'
+	bl_label = ".menuから取り込み"
+	bl_description = "menuファイルからblendsetを取り込みます"
+	bl_options = {'REGISTER', 'UNDO'}
+	
+	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
+	filename_ext = ".menu"
+	filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
+	
+	@classmethod
+	def poll(self, context):
+		ob = context.active_object
+		if ob and ob.type == 'MESH':
+			return True
+		return False
+	
+	def invoke(self, context, event):
+		if common.prefs().menu_import_path:
+			self.filepath = common.prefs().menu_import_path
+		else:
+			self.filepath = common.prefs().menu_default_path
+		
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+		
+	def execute(self, context):
+		common.prefs().menu_import_path = self.filepath
+		
+		ob = context.active_object
+		props = ob.data
+		
+		try:
+			file = open(self.filepath, 'rb')
+		except:
+			self.report(type={'ERROR'}, message="ファイル(%s)を開けません (ファイルが見つからない、アクセス権限がない等)")
+			return {'CANCELLED'}
+		
+		if common.read_str(file) != 'CM3D2_MENU':
+			self.report(type={'ERROR'}, message="これはmenuファイルではありません. インポートを中断します")
+			return {'CANCELLED'}
+		
+		for prop_key in props.keys():
+			if prop_key.startswith('blendset:'):
+				del props[prop_key]
+			# elif prop_key.startswith('cm3d2menu:'):
+			# 	del props[prop_key]
+		
+		set_item_count = 0
+		try:
+			menu_ver = struct.unpack('<i', file.read(4))[0]
+			menu_path = common.read_str(file)
+			menu_name = common.read_str(file)
+			menu_cate = common.read_str(file)
+			menu_desc = common.read_str(file)
+			# props['cm3d2menu:ver'] = mate_ver
+			# props['cm3d2menu:path'] = mate_path
+			# props['cm3d2menu:name'] = mate_name
+			# props['cm3d2menu:cate'] = mate_cate
+			# props['cm3d2menu:desc'] = mate_desc
+			
+			num = struct.unpack('<i', file.read(4))[0]
+			vals = []
+			length = struct.unpack('<B', file.read(1))[0]
+			# include_blendset = False
+			# idx = 0
+			while (length > 0):
+				vals.clear()
+				key = common.read_str(file)
+				
+				for i in range(length-1):
+					vals.append( common.read_str(file) )
+				
+				if key == 'blendset':
+					if length >= 2:
+						bs_name = vals[0]
+						text = ""
+						for i in range(1, length-2, 2):
+							text += vals[i] + " " + vals[i+1] + ","
+						
+						props['blendset:' + bs_name] = text
+						set_item_count += 1
+						
+						# if not include_blendset:
+						# 	props['cm3d2menu:bspos'] + idx
+						# 	include_blendset = True
+				
+				# else:
+				# 	text = key + '\t'
+				# 	for i in range(0, length-1):
+				# 		text += vals[i] + "\t"
+				# 	props['cm3d2menu:' + idx] = text
+				# 	idx += 1
+				chunk = file.read(1)
+				if len(chunk) == 0: break
+				length = struct.unpack('<B', chunk)[0]
+				
+			props['menu_path'] = self.filepath
+		except:
+			self.report(type={'ERROR'}, message="menuファイルの取り込み中に問題が発生しました." )
+			return {'CANCELLED'}
+		finally:
+			file.close()
+			
+		msg = bpy.app.translations.pgettext('shapekey.PasteBlendsets.Finished')
+		self.report(type={'INFO'}, message=msg % set_item_count)
+		return {'FINISHED'}
+
+class export_cm3d2_menu(bpy.types.Operator):
+	bl_idname = 'shapekey.export_cm3d2_menu'
+	bl_label = "menuへエクスポート"
+	bl_description = "指定されたmenuファイルをベースにblendsetを出力します"
+	
+	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
+	filename_ext = ".menu"
+	filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
+	
+	is_backup = bpy.props.BoolProperty(name="ファイルをバックアップ", default=True, description="ファイルに上書きする場合にバックアップファイルを複製します")
+	savefile  = bpy.props.StringProperty(name="保存ファイル名", default='', description="未指定の場合は、ベースとなるmenuファイルを上書きします")
+	
+	@classmethod
+	def poll(self, context):
+		ob = context.active_object
+		if ob and ob.type == 'MESH':
+			return True
+		return False
+	
+	def invoke(self, context, event):
+		ob = context.active_object
+		props = ob.data
+		self.filepath = ''
+		if 'menu_path' in props:
+			filepath = props['menu_path']
+			if os.path.exists(filepath):
+				self.filepath = filepath
+
+		if self.filepath is None:
+			if common.prefs().menu_export_path:
+				self.filepath = common.prefs().menu_export_path
+			else:
+				self.filepath = common.prefs().menu_default_path
+		
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+	
+	def draw(self, context):
+		self.layout.prop(self, 'is_backup', icon='FILE_BACKUP')
+		self.layout.prop(self, 'savefile', icon='NEW')
+		self.layout.label(text="↑ファイル名を指定しない場合は上書き")#, icon='LAMP')
+	
+	def execute(self, context):
+		common.prefs().menu_export_path = self.filepath
+
+		filename = os.path.basename(self.filepath)
+		outdir = os.path.dirname(self.filepath)
+		
+		ob = context.active_object
+		try:
+			infile = open(self.filepath, 'rb')
+		except:
+			self.report(type={'ERROR'}, message="ファイル(%s)を開けません (ファイルが見つからない、アクセス権限がない等)")
+			return {'CANCELLED'}
+		
+		if common.read_str(infile) != 'CM3D2_MENU':
+			self.report(type={'ERROR'}, message="これはmenuファイルではありません. インポートを中断します")
+			return {'CANCELLED'}
+		
+		props = ob.data
+		try:
+			with tempfile.NamedTemporaryFile(mode='w+b', suffix='temp', prefix=filename, dir=outdir, delete=False) as outfile:
+				tempfilepath = outfile.name
+				menu_ver = struct.unpack('<i', infile.read(4))[0]
+				menu_path = common.read_str(infile)
+				menu_name = common.read_str(infile)
+				menu_cate = common.read_str(infile)
+				menu_desc = common.read_str(infile)
+
+				common.write_str(outfile, 'CM3D2_MENU')
+				outfile.write(struct.pack('<i', menu_ver))
+				common.write_str(outfile, menu_path)
+				common.write_str(outfile, menu_name)
+				common.write_str(outfile, menu_cate)
+				common.write_str(outfile, menu_desc)
+				
+				ba = bytearray()
+				num = struct.unpack('<i', infile.read(4))[0]
+				
+				length = struct.unpack('<B', infile.read(1))[0]
+				exported_blendset = False
+				while (length > 0):
+					
+					key = common.read_str(infile)
+					if key == 'blendset':
+						for i in range(length-1):
+							val = common.read_str(infile)
+
+						if not exported_blendset:
+							exported_blendset = True
+							# export blendset
+							self.export_blendset(ba, props.items())
+							# read and discard
+					else:
+						#ba += struct.pack('<b', length)
+						ba.append(length)
+						common.append_str(ba, key)
+						for i in range(length-1):
+							val = common.read_str(infile)
+							common.append_str(ba, val)
+					
+					chunk = infile.read(1)
+					if len(chunk) == 0: break
+					length = struct.unpack('<B', chunk)[0]
+				
+				if not exported_blendset:
+					self.export_blendset(ba, props.items())
+
+				ba.append(0) # EOFとして長さ0を挿入
+				num = len(ba)
+				outfile.write(struct.pack('<i', num))
+				outfile.write(ba)
+				
+				props['menu_path'] = self.filepath
+		except:
+			self.report(type={'ERROR'}, message="エクスポート処理のベースとするmenuファイルの読み込みに失敗しました. %s" % self.filepath )
+			if tempfilepath:
+				os.remove(tempfilepath)
+			raise
+			#return {'CANCELLED'}
+		finally:
+			if infile:	infile.close()
+		
+		# バックアップチェック
+		if self.savefile:
+			filename = self.savefile
+			if not filename.endswith('.menu'):
+				filename += '.menu'
+			outfilepath = os.path.join(outdir, filename)
+		else:
+			outfilepath = self.filepath
+		
+		if self.is_backup and os.path.exists(outfilepath):
+			bk_ext = common.prefs().backup_ext
+			if bk_ext:
+				bkfile = outfilepath + '.' + bk_ext
+				if os.path.exists(bkfile):
+					os.remove(bkfile)
+				os.rename(outfilepath, bkfile)
+		if os.path.exists(outfilepath):
+			os.remove(outfilepath)
+		os.rename(tempfilepath, outfilepath)
+		
+		msg = "blendset情報をmenuファイルへ出力しました。" + outfilepath #bpy.app.translations.pgettext('shapekey.PasteBlendsets.Finished')
+		self.report(type={'INFO'}, message=msg)
+		# common.decorate_material(mate, self.is_decorate, me, ob.active_material_index)
+		return {'FINISHED'}
+	
+	def export_blendset(self, ba, props):
+		for propkey, propval in props:
+			if propkey.startswith('blendset:'):
+				pvalItems = propval.split(',')
+				itemLength = len(pvalItems)*2 # 末尾にカンマがあるため+2は不要
+				
+				ba.append(itemLength) # bytearray( struct.pack('<i', itemLength) )
+				common.append_str(ba, 'blendset')
+				common.append_str(ba, propkey[9:])
+				
+				for val in pvalItems:
+					if len(val) <= 2: continue
+					entry = val.split(' ')
+					if len(entry) >= 2:
+						common.append_str(ba, entry[0])
+						common.append_str(ba, entry[1])
 	
 class BlendsetItem(bpy.types.PropertyGroup):
 	name = bpy.props.StringProperty()

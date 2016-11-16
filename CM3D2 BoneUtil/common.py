@@ -1,4 +1,4 @@
-import bpy, os, re
+import bpy, re, struct
 
 addon_name = "CM3D2 BoneUtil"
 # このアドオンの設定値群を呼び出す
@@ -79,3 +79,36 @@ def replace_bonename(name, source_type, target_type):
 		return re.sub(r'(_)?_yure_(_)?', replace_str, name)
 
 	return name
+
+###########################
+# CM3D2Converterより引用
+def read_str(file, total_b = ""):
+	for i in range(9):
+		b_str = format(struct.unpack('<B', file.read(1))[0], '08b')
+		total_b = b_str[1:] + total_b
+		if b_str[0] == '0': break
+	return file.read(int(total_b, 2)).decode('utf-8')
+
+# CM3D2専用ファイル用の文字列書き込み
+def write_str(file, raw_str):
+	b_str = format(len(raw_str.encode('utf-8')), 'b')
+	for i in range(9):
+		if 7 < len(b_str):
+			file.write( struct.pack('<B', int("1"+b_str[-7:], 2)) )
+			b_str = b_str[:-7]
+		else:
+			file.write( struct.pack('<B', int(b_str, 2)) )
+			break
+	file.write(raw_str.encode('utf-8'))
+
+# bytearrayへの文字列追加（
+def append_str(barray, raw_str):
+	b_str = format(len(raw_str.encode('utf-8')), 'b')
+	for i in range(9):
+		if 7 < len(b_str):
+			barray += bytearray( struct.pack('<B', int("1"+b_str[-7:], 2)) )
+			b_str = b_str[:-7]
+		else:
+			barray += bytearray( struct.pack('<B', int(b_str, 2)) )
+			break
+	barray += raw_str.encode('utf-8')

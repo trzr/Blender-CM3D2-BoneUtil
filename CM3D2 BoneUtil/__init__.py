@@ -1,7 +1,7 @@
 bl_info = {
 	"name" : "CM3D2 BoneUtil",
 	"author" : "trzr",
-	"version" : (0, 2, 7),
+	"version" : (0, 2, 8),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
 	"description" : "",
@@ -41,10 +41,15 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	#bone2mesh = bpy.props.BoolProperty(name="GenMeshFromBoneFeature", description="GenMeshFromBoneFDesc", default=False )
 	bsimp = bpy.props.BoolProperty(name="shapekey.BsImporterFeature", description="shapekey.BsImporterFDesc", default=True )
 	
+	backup_ext = bpy.props.StringProperty(name="バックアップの拡張子 (空欄で無効)", description="エクスポート時にバックアップをこの拡張子で作成します、空欄でバックアップを無効", default='bak')
+	menu_default_path = bpy.props.StringProperty(name="menuファイル配置ディレクトリ", subtype='DIR_PATH', description="設定すれば、menuを扱う時は必ずここからファイル選択を始めます")
+	menu_import_path  = bpy.props.StringProperty(name="menuインポート時のデフォルトパス", subtype='FILE_PATH', description="menuインポート時に最初はここが表示されます、インポート毎に保存されます")
+	menu_export_path  = bpy.props.StringProperty(name="menuエクスポート時のデフォルトパス", subtype='FILE_PATH', description="menuエクスポート時に最初はここが表示されます、エクスポート毎に保存されます")
+	
 	update_history = addon_updater.VersionHistory()
 	update_history.now_ver = [ v for v in bl_info['version'] ]
 	version = '.'.join( [ str(v) for v in bl_info['version'] ] )
-	
+
 	def draw(self, context):
 		layout = self.layout
 		layout.label(text="PushSaveButton", icon='QUESTION')
@@ -56,7 +61,13 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		split.prop(self, 'bsimp', icon='NONE')
 		#split.prop(self, 'bone2mesh', icon='NONE')
 		
+		box = layout.box()
+		box.prop(self, 'backup_ext', icon='FILE_BACKUP')
+		box.label(text="menuファイル", icon='FILE_IMAGE')
+		box.prop(self, 'menu_default_path', icon='FILESEL', text="menuファイル選択時の初期フォルダ")
+		
 		row = layout.row()
+		
 		#row.label(self, 'version', icon='INFO')
 		row.menu('INFO_MT_CM3D2_BoneUtil_history', icon='INFO')
 		

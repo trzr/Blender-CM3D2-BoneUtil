@@ -11,16 +11,16 @@
 　Blender2.76以上(動作確認は[2.77a][blender277])がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
-　[Releases][]のリンク先にある該当該当のバージョンか、
+　[Releases][]のリンク先にある該当バージョンか、
 画面右の[Download ZIP][master_zip]からファイルをダウンロード・解凍し、  
 
 ```
  %APPDATA%\Blender Foundation\Blender\{Version}\scripts\addons\  
  ```
 に配置してください。  
-例) Windows7、Blender-2.77a、ユーザ「UserA」の場合  
+例) Windows7/10、Blender-2.77a、ユーザ名「UserA」の場合  
 ```
-C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM3D2 BoneUtil\*.py
+C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM3D2 BoneUtil\__init__.py
 ```
    に配置する形になります。  
    もし、フォルダが存在しない場合は作成してください。
@@ -29,6 +29,8 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM
 　Blenderを起動し、ユーザー設定のアドオンタブで「cm3d2」等で検索し、  
 　「Tools: CM3D2 BoneUtil」をオンにすれば(一時的に)有効になります。  
 　次回起動時からも有効にしたい場合は「ユーザー設定の保存」をクリックして下さい。  
+[!]()
+
 
 
 ## ■ 提供機能
