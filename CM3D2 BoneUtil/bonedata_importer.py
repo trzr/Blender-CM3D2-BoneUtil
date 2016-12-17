@@ -89,6 +89,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	lbd_dic = {}
 	
 	coor = None
+	rotor = None # BaseBoneが回転している場合があるため追加 by夜勤D
 	target_props = None
 	target_bones = {}
 	bone_names = set()
@@ -177,6 +178,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				return {'CANCELLED'}
 			
 			self.coor = bbdata.co.split(' ')
+			self.rotor = bbdata.rot.split(' ')# BaseBoneが回転している場合があるため追加 by夜勤D
 			
 			if self.target_type == 'Descendant':
 				for bone in self.target_bones:
@@ -460,18 +462,18 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				qlb = bone_d.matrix_local.to_quaternion()
 				qlb.w,qlb.x,qlb.y,qlb.z = qlb.w,qlb.y,-qlb.z,-qlb.x
 				lb = qlb.to_matrix()
-				localbone = mathutils.Matrix([
-					 [-lb[2][0],-lb[2][1],-lb[2][2]],
-					 [-lb[0][0],-lb[0][1],-lb[0][2]],
-					 [ lb[1][0], lb[1][1], lb[1][2]]
-					])
+				# BaseBoneが回転している場合に対応 by夜勤D
+				mrbase = mathutils.Quaternion((float(self.rotor[0]),float(self.rotor[1]),float(self.rotor[2]),float(self.rotor[3]))).to_matrix()
+				rotate_first = mathutils.Matrix([[0,0,-1],[0,1,0],[1,0,0]])
+				localbone = mrbase.inverted()*rotate_first*lb
+				mt = mathutils.Vector([(bone_d.head_local.x)/self.scale,-(bone_d.head_local.z)/self.scale,(bone_d.head_local.y)/self.scale])*mrbase
 				localbone.resize_4x4()
 				localbone = mathutils.Matrix([
 					[1,0,0,0],
 					[0,1,0,0],
 					[0,0,1,0],
-					[(bone_d.head_local.x)/self.scale+float(self.coor[0]),-(bone_d.head_local.y)/self.scale-float(self.coor[2]),-(bone_d.head_local.z)/self.scale+float(self.coor[1]),1]]) * localbone
-				
+					[mt.x+float(self.coor[0]),mt.y-float(self.coor[2]),mt.z+float(self.coor[1]),1]]) * localbone
+				# 以上変更箇所 by夜勤D
 				string_localbone ="{0},{1:.17} {2:.17} {3:.17} {4:.17} {5:.17} {6:.17} {7:.17} {8:.17} {9:.17} {10:.17} {11:.17} {12:.17} {13:.17} {14:.17} {15:.17} {16:.17}".format(
 					bone_name,localbone[0][0], localbone[0][1], localbone[0][2], localbone[0][3],
 					localbone[1][0], localbone[1][1], localbone[1][2],localbone[1][3],
