@@ -92,6 +92,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	rotor = None # BaseBoneが回転している場合があるため追加 by夜勤D
 	target_props = None
 	target_bones = {}
+	target_data = None
 	bone_names = set()
 	treated_bones = set()
 	count_bd_add, count_bd_update = 0, 0
@@ -116,11 +117,13 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		if ob.type == 'ARMATURE':
 			self.bb_name = ob.data['BaseBone']
 			self.target_props = ob.data
+			self.target_data = ob.data
 			self.target_bones = ob.data.bones
 			self.is_mesh = False
 		elif ob.type == 'MESH':
 			self.bb_name = ob['BaseBone']
 			self.target_props = ob
+			self.target_data = ob.parent.data
 			self.target_bones = ob.parent.data.bones
 			self.is_mesh = True
 		
@@ -180,17 +183,22 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.coor = bbdata.co.split(' ')
 			self.rotor = bbdata.rot.split(' ')# BaseBoneが回転している場合があるため追加 by夜勤D
 			
+			if ob.mode == 'EDIT':
+				bones = self.target_data.edit_bones
+			else:
+				bones = self.target_data.bones
+			
 			if self.target_type == 'Descendant':
-				for bone in self.target_bones:
+				for bone in bones:
 					if bone.select:
-						self.calc_bonedata(bone, True);
+						self.calc_bonedata(self.target_bones[bone.name], True)
 			elif self.target_type == 'Selected':
-				for bone in self.target_bones:
+				for bone in bones:
 					if bone.select:
-						self.calc_bonedata(bone);
+						self.calc_bonedata(self.target_bones[bone.name])
 			elif self.target_type == 'All':
-				for bone in self.target_bones:
-					self.calc_bonedata(bone);
+				for bone in bones:
+					self.calc_bonedata(self.target_bones[bone.name])
 			
 			if self.sync_bd:
 				# BoneDataの削除
