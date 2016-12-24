@@ -8,7 +8,7 @@
 
 ## ■ インストール (Installation)
 #### ◇事前準備
-　Blender2.76以上(動作確認は[2.77a][blender277])がインストールされていることが前提です。
+　Blender2.76以上(動作確認は[2.78][blender278])がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
 　[Releases][]のリンク先にある該当バージョンか、
@@ -18,9 +18,9 @@
  %APPDATA%\Blender Foundation\Blender\{Version}\scripts\addons\  
  ```
 に配置してください。  
-例) Windows7/10、Blender-2.77a、ユーザ名「UserA」の場合  
+例) Windows7/10、Blender-2.78、ユーザ名「UserA」の場合  
 ```
-C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM3D2 BoneUtil\__init__.py
+C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM3D2 BoneUtil\*.py
 ```
    に配置する形になります。  
    もし、フォルダが存在しない場合は作成してください。
@@ -56,7 +56,7 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.77\scripts\addons\CM
 
 
 [CM3D2 Converter]:https://github.com/CM3Duser/Blender-CM3D2-Converter
-[blender277]:http://download.blender.org/release/Blender2.77/
+[blender278]:http://download.blender.org/release/Blender2.78/
 [master_zip]:https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip
 [Releases]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
 [BoneImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Import%20To%20BoneData
