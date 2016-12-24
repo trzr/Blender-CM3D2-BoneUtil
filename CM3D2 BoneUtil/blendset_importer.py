@@ -13,9 +13,9 @@ def menu_func(self, context):
 	col = box.column()
 	split = col.split(percentage=0.14, align=True)
 	if bsl.display_box:
-		split.prop(bsl, "display_box", text="", icon='TRIA_DOWN')# icon='DOWNARROW_HLT')
+		split.prop(bsl, 'display_box', text="", icon='TRIA_DOWN')
 	else:
-		split.prop(bsl, "display_box", text="", icon='TRIA_RIGHT')
+		split.prop(bsl, 'display_box', text="", icon='TRIA_RIGHT')
 	split.label(text="shapekey.BatchOperation", icon='HAND')
 	
 	if not bsl.display_box: return

@@ -355,7 +355,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 
 	def calc_bonedata(self, targetbone, recursive=False):
 		bone_name = targetbone.name
-		#self.report({'INFO'}, 'Bone:%s' % targetbone.name)
+		
 		bone_d = self.target_bones[bone_name]
 		
 		bone_name = common.remove_serial_num(bone_name)
@@ -473,7 +473,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 					[0,1,0,0],
 					[0,0,1,0],
 					[mt.x+float(self.coor[0]),mt.y-float(self.coor[2]),mt.z+float(self.coor[1]),1]]) * localbone
-				# 以上変更箇所 by夜勤D
+				
 				string_localbone ="{0},{1:.17} {2:.17} {3:.17} {4:.17} {5:.17} {6:.17} {7:.17} {8:.17} {9:.17} {10:.17} {11:.17} {12:.17} {13:.17} {14:.17} {15:.17} {16:.17}".format(
 					bone_name,localbone[0][0], localbone[0][1], localbone[0][2], localbone[0][3],
 					localbone[1][0], localbone[1][1], localbone[1][2],localbone[1][3],
