@@ -74,6 +74,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
 	sync_bd       = bpy.props.BoolProperty(name="RemoveBoneDataNonExistent", default=False)
 	exclude_ikbd  = bpy.props.BoolProperty(name="ExcludeIKBoneDataForRemove", default=True)
+	is_old        = bpy.props.BoolProperty(name="OldMode", default=False)
 	
 	vg_opr = bpy.props.EnumProperty(name="VertexGroup",
 			items=[
@@ -98,7 +99,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	count_bd_add, count_bd_update = 0, 0
 	count_lbd_add, count_lbd_update = 0, 0
 	is_mesh = False
-
+	
 	@classmethod
 	def poll(cls, context):
 		ob = context.active_object
@@ -126,7 +127,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.target_data = ob.parent.data
 			self.target_bones = ob.parent.data.bones
 			self.is_mesh = True
-		
+		self.is_old = False
+
 		return context.window_manager.invoke_props_dialog(self)
 
 	def draw(self, context):
@@ -140,6 +142,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		row.prop(self, 'import_lbd', icon='NONE')
 		self.layout.prop(self, 'sync_bd', icon='ERROR')
 		self.layout.prop(self, 'exclude_ikbd', icon='NONE')
+		self.layout.prop(self, 'is_old', icon='NONE')
 		
 		ob = context.active_object
 		if ob.type == 'MESH':
@@ -152,8 +155,11 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		self.count_lbd_add = 0
 		self.count_lbd_update = 0
 		self.treated_bones.clear()
-		
+
 		self.bone_names.clear()
+		if not self.is_old:
+			self.is_old = self.check_old()
+		
 		for target_bone in self.target_bones:
 			bone_name = common.remove_serial_num(target_bone.name)
 			if bone_name in self.bone_names:
@@ -180,7 +186,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				self.report(type={'ERROR'}, message=msg)
 				return {'CANCELLED'}
 			
-			self.coor = bbdata.co.split(' ')
+			# TODO プロパティから取り込むか、ボーンから取り込むかを選択
+			self.coor  = bbdata.co.split(' ')
 			self.rotor = bbdata.rot.split(' ')# BaseBoneが回転している場合があるため追加 by夜勤D
 			
 			if ob.mode == 'EDIT':
@@ -243,9 +250,14 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				ob.parent.hide = src_hide_parent
 		
 		# 処理件数を出力する。BoneData数, LocalBoneData数
-		logmsg = "TargetCount:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d)" % (len(self.treated_bones),
+		if self.is_old:
+			msgopt = "[old mode]"
+		else:
+			msgopt = ""
+		logmsg = "TargetCount:%d, BoneData(add:%d,upate:%d,del:%d) LocalBoneData(add:%d,update:%d,del:%d) %s" % (len(self.treated_bones),
 			self.count_bd_add, self.count_bd_update, count_bd_del,
-			self.count_lbd_add,self.count_lbd_update, count_lbd_del)
+			self.count_lbd_add,self.count_lbd_update, count_lbd_del,
+			msgopt)
 		self.report(type={'INFO'}, message="ImportCompleted." + logmsg)
 		return {'FINISHED'}
 	
@@ -360,45 +372,74 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.target_props[rename_item[2]] = rename_item[1]
 		
 		change_items.clear()
-
+	
+	# 旧版の取り込みデータであるかの判定 (やっつけ)
+	# return True => 旧版
+	def check_old(self):
+		if 'Bip01' in self.target_bones:
+			if round(self.target_bones['Bip01'].length - 1.0, 6) == 0:
+				return False
+			else:
+				return True
+		else:
+			for target_bone in self.target_bones:
+				if target_bone.parent and len(target_bone.children) == 0:
+					# 末端ボーンの長さで判断
+					baselength = target_bone.parent.length * 0.5
+					if round(target_bone.length - baselength, 6) == 0:
+						return False
+					elif round(target_bone.length - 0.1, 6) == 0:
+						return True
+		return False
+ 	
 	def calc_bonedata(self, targetbone, recursive=False):
 		bone_name = targetbone.name
-		
 		bone_d = self.target_bones[bone_name]
-		
 		bone_name = common.remove_serial_num(bone_name)
 		if bone_name in self.treated_bones: return
 		is_nub = bone_name.lower().endswith('nub')
 		
 		# BoneData
 		if self.import_bd:
+			
 			if targetbone.parent is None: # 親無しボーン
+				
 				parentbone_name = 'None'
-				c0 = bone_d.matrix_local.to_translation()
-				c0 /= self.scale
+				bone_mat = bone_d.matrix_local
+				c0 = bone_mat.to_translation() / self.scale
 				c0.x, c0.y, c0.z = -c0.x, c0.z, -c0.y
 				bone_v = c0
 				
-				r0 = bone_d.matrix_local.to_quaternion()
-				r0 *= mathutils.Quaternion((0, 0, 1), math.radians(90))
-				r0.x, r0.y, r0.z, r0.w = -r0.x, r0.z, -r0.y, -r0.w
+				r0 = bone_mat.to_quaternion()
+				if self.is_old:
+					r0 *= mathutils.Quaternion((0, 0, 1), math.radians(90))
+					r0.w, r0.x, r0.y, r0.z, = -r0.w, -r0.x, r0.z, -r0.y
+				else:
+					r1 = mathutils.Euler((0, 0, math.radians(-90)), 'XYZ').to_quaternion()
+					r2 = mathutils.Euler((math.radians(-90), 0, 0), 'XYZ').to_quaternion()
+					r0 = r0 * r1 * r2
+					r0.w, r0.x, r0.y, r0.z = -r0.y, -r0.z, -r0.x, r0.w
 				bone_q = r0
+				
 			else:
-				parentbone_name = targetbone.parent.name
+				parentbone_name = common.remove_serial_num(targetbone.parent.name)
 				
-				parentbone_name = common.remove_serial_num(parentbone_name)
 				bone_v = (bone_d.head_local - bone_d.parent.head_local)*bone_d.parent.matrix_local / self.scale
-				bone_v.x, bone_v.y, bone_v.z = -bone_v.y, bone_v.z, bone_v.x
-				
 				bone_q = bone_d.matrix.to_3x3().to_quaternion()
-				bone_q.w, bone_q.x, bone_q.y, bone_q.z = bone_q.w, bone_q.y, -bone_q.z, -bone_q.x
+				if self.is_old:
+					bone_v.x, bone_v.y, bone_v.z = -bone_v.y, bone_v.z, bone_v.x
+					bone_q.w, bone_q.x, bone_q.y, bone_q.z = bone_q.w, bone_q.y, -bone_q.z, -bone_q.x
+					
+				else:
+					bone_v.x, bone_v.y, bone_v.z = -bone_v.y, -bone_v.x, bone_v.z
+					bone_q.w, bone_q.x, bone_q.y, bone_q.z = bone_q.w, bone_q.y, bone_q.x, -bone_q.z
 			
 			active_prop_name = ''
 			bdata1 = self.bd_dic.get(bone_name)
 			if bdata1:
 				active_prop_name = bdata1.prop_name
 				sclflag = bdata1.sclflag
-				self.count_bd_update +=1
+				self.count_bd_update += 1
 			else:
 				# not found bonedata. 新規追加BoneData
 				self.count_bd_add += 1
@@ -407,14 +448,21 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				sclflag = 0
 			
 			string_bone ="{0},{1},{2},{3:.17} {4:.17} {5:.17},{6:.17} {7:.17} {8:.17} {9:.17}".format(
-				bone_name, sclflag, parentbone_name,bone_v.x, bone_v.y,bone_v.z,bone_q.w,bone_q.x,bone_q.y,bone_q.z)
+				bone_name, sclflag, parentbone_name,
+				bone_v.x, bone_v.y, bone_v.z,
+				bone_q.w, bone_q.x, bone_q.y, bone_q.z)
 			self.target_props[active_prop_name] = string_bone
 			
 			# add bonedata "_nub"
 			if not is_nub and len(targetbone.children) == 0:
 				# 長さが基準のままであればnub不要と判断 (有効数字7桁で判断失敗するボーンあり)
-				base_length = 1.0 if targetbone.parent is None else 0.1
+				if self.is_old:
+					base_length = 0.2 * self.scale if targetbone.parent is None else 0.1
+				else:
+					base_length = 0.2 * self.scale if targetbone.parent is None else targetbone.parent.length * 0.5
+				
 				if round(targetbone.length - base_length, 6) != 0:
+					
 					nub_scl = 0
 					nub_bonename = None
 					add_prop_name = None
@@ -440,13 +488,18 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 							suf += 1
 					
 					bone_vt = (bone_d.tail_local - bone_d.head_local)*bone_d.matrix_local / self.scale
-					bone_vt.x , bone_vt.y ,bone_vt.z = -bone_vt.y , bone_vt.z , bone_vt.x
-					
 					bone_qt = bone_d.matrix.to_3x3().to_quaternion()
-					bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z = bone_qt.w, bone_qt.y, -bone_qt.z, -bone_qt.x
+					if self.is_old:
+						bone_vt.x, bone_vt.y, bone_vt.z = -bone_vt.y, bone_vt.z, bone_vt.x
+						bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z = bone_qt.w, bone_qt.y, -bone_qt.z, -bone_qt.x
+					else:
+						bone_vt.x, bone_vt.y, bone_vt.z = -bone_vt.y, -bone_vt.x, bone_vt.z
+						bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z = bone_qt.w, bone_qt.y, bone_qt.x, -bone_qt.z
 					
 					string_bone_nub ="{0},{1},{2},{3:.17} {4:.17} {5:.17},{6:.17} {7:.17} {8:.17} {9:.17}".format(
-						nub_bonename, nub_scl, bone_name,bone_vt.x, bone_vt.y,bone_vt.z,bone_qt.w,bone_qt.x,bone_qt.y,bone_qt.z)
+						nub_bonename, nub_scl, bone_name,
+						bone_vt.x, bone_vt.y, bone_vt.z,
+						bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z)
 					
 					# print("write:" + active_prop_name)
 					if add_prop_name is None:
@@ -468,23 +521,30 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			
 			if not lbd_skip:
 				qlb = bone_d.matrix_local.to_quaternion()
-				qlb.w,qlb.x,qlb.y,qlb.z = qlb.w,qlb.y,-qlb.z,-qlb.x
-				lb = qlb.to_matrix()
+				if self.is_old:
+					qlb.w, qlb.x, qlb.y, qlb.z = qlb.w, qlb.y, -qlb.z, -qlb.x
+					rotate_first = mathutils.Matrix( [[0,0,-1], [0,1,0], [1,0,0]] ) # mathutils.Euler((0, math.radians(-90), 0), 'XYZ')
+				else:
+					qlb.w, qlb.x, qlb.y, qlb.z = qlb.w, qlb.y, qlb.x, -qlb.z
+					#rotate_first = mathutils.Euler((math.radians(-90), math.radians(-90), 0), 'XYZ')
+					rotate_first = mathutils.Matrix( [[0,1,0], [0,0,1], [1,0,0]] )
+				
 				# BaseBoneが回転している場合に対応 by夜勤D
-				mrbase = mathutils.Quaternion((float(self.rotor[0]),float(self.rotor[1]),float(self.rotor[2]),float(self.rotor[3]))).to_matrix()
-				rotate_first = mathutils.Matrix([[0,0,-1],[0,1,0],[1,0,0]])
-				localbone = mrbase.inverted()*rotate_first*lb
-				mt = mathutils.Vector([(bone_d.head_local.x)/self.scale,-(bone_d.head_local.z)/self.scale,(bone_d.head_local.y)/self.scale])*mrbase
+				mrbase = mathutils.Quaternion( (float(self.rotor[0]), float(self.rotor[1]), float(self.rotor[2]), float(self.rotor[3])) ).to_matrix()
+				mt = mathutils.Vector([bone_d.head_local.x, -bone_d.head_local.z, bone_d.head_local.y])/self.scale * mrbase
+				
+				localbone = mrbase.inverted() * rotate_first * qlb.to_matrix()
 				localbone.resize_4x4()
 				localbone = mathutils.Matrix([
 					[1,0,0,0],
 					[0,1,0,0],
 					[0,0,1,0],
-					[mt.x+float(self.coor[0]),mt.y-float(self.coor[2]),mt.z+float(self.coor[1]),1]]) * localbone
+					[mt.x+float(self.coor[0]), mt.y-float(self.coor[2]), mt.z+float(self.coor[1]), 1] ]) * localbone
 				
 				string_localbone ="{0},{1:.17} {2:.17} {3:.17} {4:.17} {5:.17} {6:.17} {7:.17} {8:.17} {9:.17} {10:.17} {11:.17} {12:.17} {13:.17} {14:.17} {15:.17} {16:.17}".format(
-					bone_name,localbone[0][0], localbone[0][1], localbone[0][2], localbone[0][3],
-					localbone[1][0], localbone[1][1], localbone[1][2],localbone[1][3],
+					bone_name,
+					localbone[0][0], localbone[0][1], localbone[0][2], localbone[0][3],
+					localbone[1][0], localbone[1][1], localbone[1][2], localbone[1][3],
 					localbone[2][0], localbone[2][1], localbone[2][2], localbone[2][3],
 					localbone[3][0], localbone[3][1], localbone[3][2], localbone[3][3])
 				
