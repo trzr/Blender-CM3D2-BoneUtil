@@ -435,6 +435,7 @@ class copy_blendset(bpy.types.Operator):
 	@classmethod
 	def poll(self, context):
 		ob = context.active_object
+		if ob is None: return False
 		shape_keys = ob.data.shape_keys
 		
 		if shape_keys and len(shape_keys.key_blocks.items()) < 1:
