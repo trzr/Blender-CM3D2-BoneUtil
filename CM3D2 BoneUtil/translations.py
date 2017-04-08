@@ -227,7 +227,7 @@ dic = {
 		("*", "updater.Finished") : "Blender-CM3D2-BoneUtilを更新(ver:%s)しました。Blenderを再起動してください",
 		("*", "updater.History") : "CM3D2 BoneUtilの更新履歴",
 		("*", "updater.FailedGetHistory") : "更新履歴の取得に失敗しました",
-		("*", "updater.HistoryDays") : "%03d日前",
+		("*", "updater.HistoryDays")  : "%04d日前",
 		("*", "updater.HistoryHours") :"%02d時間前",
 		("*", "updater.HistoryMins") : "%03d分前",
 		("*", "updater.HistorySecs") : "%03d秒前",
