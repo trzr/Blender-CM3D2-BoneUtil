@@ -22,10 +22,10 @@ def menu_func(self, context):
 	
 	col = box.column()
 	sub_row1 = col.row(align=True)
-	sub_row1.label(text='.menu 連携')
-	label = 'インポート'
+	sub_row1.label(text='shapekey.menuif')
+	label = bpy.app.translations.pgettext('Import')
 	sub_row1.operator('shapekey.import_cm3d2_menu', icon='IMPORT', text=label)
-	label = 'エクスポート'
+	label = bpy.app.translations.pgettext('Export')
 	sub_row1.operator('shapekey.export_cm3d2_menu', icon='EXPORT', text=label)
 	
 	sub_row1 = col.row(align=True)
@@ -458,8 +458,8 @@ class copy_blendset(bpy.types.Operator):
 		
 class import_cm3d2_menu(bpy.types.Operator):
 	bl_idname = 'shapekey.import_cm3d2_menu'
-	bl_label = ".menuから取り込み"
-	bl_description = "menuファイルからblendsetを取り込みます"
+	bl_label = 'import menu file'#bpy.app.translations.pgettext('shapekey.ImportMenufile')
+	bl_description = bpy.app.translations.pgettext('shapekey.Menu.ImportfileDesc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
@@ -491,11 +491,13 @@ class import_cm3d2_menu(bpy.types.Operator):
 		try:
 			file = open(self.filepath, 'rb')
 		except:
-			self.report(type={'ERROR'}, message="ファイル(%s)を開けません (ファイルが見つからない、アクセス権限がない等)")
+			msg = bpy.app.translations.pgettext('shapekey.CannotOpenFile') % self.filepath
+			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		if common.read_str(file) != 'CM3D2_MENU':
-			self.report(type={'ERROR'}, message="これはmenuファイルではありません. インポートを中断します")
+			msg = bpy.app.translations.pgettext('shapekey.Menu.InvalidFile') % self.filepath
+			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		for prop_key in props.keys():
@@ -555,7 +557,8 @@ class import_cm3d2_menu(bpy.types.Operator):
 				
 			props['menu_path'] = self.filepath
 		except:
-			self.report(type={'ERROR'}, message="menuファイルの取り込み中に問題が発生しました." )
+			msg = bpy.app.translations.pgettext('shapekey.Menu.FailedToParsefile')
+			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		finally:
 			file.close()
@@ -566,15 +569,15 @@ class import_cm3d2_menu(bpy.types.Operator):
 
 class export_cm3d2_menu(bpy.types.Operator):
 	bl_idname = 'shapekey.export_cm3d2_menu'
-	bl_label = "menuへエクスポート"
-	bl_description = "指定されたmenuファイルをベースにblendsetを出力します"
+	bl_label = "export to menu"
+	bl_description = bpy.app.translations.pgettext('shapekey.Menu.ExportfileDesc')
 	
 	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
 	filename_ext = ".menu"
 	filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
 	
-	is_backup = bpy.props.BoolProperty(name="ファイルをバックアップ", default=True, description="ファイルに上書きする場合にバックアップファイルを複製します")
-	savefile  = bpy.props.StringProperty(name="保存ファイル名", default='', description="未指定の場合は、ベースとなるmenuファイルを上書きします")
+	is_backup = bpy.props.BoolProperty(name="shapekey.Menu.Backup", default=True, description="shapekey.Menu.BackupDesc")
+	savefile  = bpy.props.StringProperty(name="shapekey.Menu.SaveFilename", default='', description="shapekey.Menu.SaveFilenameDesc")
 	
 	@classmethod
 	def poll(self, context):
@@ -604,7 +607,7 @@ class export_cm3d2_menu(bpy.types.Operator):
 	def draw(self, context):
 		self.layout.prop(self, 'is_backup', icon='FILE_BACKUP')
 		self.layout.prop(self, 'savefile', icon='NEW')
-		self.layout.label(text="↑ファイル名を指定しない場合は上書き")#, icon='LAMP')
+		self.layout.label(text="shapekey.Menu.Overwrite")#, icon='LAMP')
 	
 	def execute(self, context):
 		common.prefs().menu_export_path = self.filepath
@@ -616,11 +619,13 @@ class export_cm3d2_menu(bpy.types.Operator):
 		try:
 			infile = open(self.filepath, 'rb')
 		except:
-			self.report(type={'ERROR'}, message="ファイル(%s)を開けません (ファイルが見つからない、アクセス権限がない等)")
+			msg = bpy.app.translations.pgettext('shapekey.CannotOpenFile') % self.filepath
+			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		if common.read_str(infile) != 'CM3D2_MENU':
-			self.report(type={'ERROR'}, message="これはmenuファイルではありません. インポートを中断します")
+			msg = bpy.app.translations.pgettext('shapekey.Menu.InvalidFile') % self.filepath
+			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		props = ob.data
@@ -679,7 +684,8 @@ class export_cm3d2_menu(bpy.types.Operator):
 				
 				props['menu_path'] = self.filepath
 		except:
-			self.report(type={'ERROR'}, message="エクスポート処理のベースとするmenuファイルの読み込みに失敗しました. %s" % self.filepath )
+			msg = bpy.app.translations.pgettext('shapekey.Menu.FailedToParsefile.Export') % self.filepath
+			self.report(type={'ERROR'}, message=msg)
 			if tempfilepath:
 				os.remove(tempfilepath)
 			raise
@@ -707,9 +713,8 @@ class export_cm3d2_menu(bpy.types.Operator):
 			os.remove(outfilepath)
 		os.rename(tempfilepath, outfilepath)
 		
-		msg = "blendset情報をmenuファイルへ出力しました。" + outfilepath #bpy.app.translations.pgettext('shapekey.PasteBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('shapekey.Menu.BlendsetsExport.Finished') % self.filepath
 		self.report(type={'INFO'}, message=msg)
-		# common.decorate_material(mate, self.is_decorate, me, ob.active_material_index)
 		return {'FINISHED'}
 	
 	def export_blendset(self, ba, props):
