@@ -36,9 +36,9 @@ def menu_func_common(self, context):
 	col = row.column()
 	
 	col = self.layout.column(align=True)
-	col.label(text="ImportBoneData4CM3D2", icon='IMPORT')
+	col.label(text="bdimport.ImportBoneData4CM3D2", icon='IMPORT')
 	row = col.row(align=True)
-	label = bpy.app.translations.pgettext("Import BoneData")
+	label = bpy.app.translations.pgettext('bdimport.ImportBoneData')
 	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
 
 class BoneData1(object):
@@ -58,8 +58,8 @@ class BoneData1(object):
 
 class import_cm3d2_bonedata(bpy.types.Operator):
 	bl_idname = 'object.import_cm3d2_bonedata'
-	bl_label = "Import BoneData"
-	bl_description = "ImportBoneDataDesc"
+	bl_label       = 'Import BoneData'
+	bl_description = bpy.app.translations.pgettext('bdimport.ImportBoneDataDesc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	bb_name       = bpy.props.StringProperty(name="BaseBoneName")
@@ -72,17 +72,23 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="ScaleDesc")
 	import_bd     = bpy.props.BoolProperty(name="BoneData", default=True)
 	import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-	sync_bd       = bpy.props.BoolProperty(name="RemoveBoneDataNonExistent", default=False)
-	exclude_ikbd  = bpy.props.BoolProperty(name="ExcludeIKBoneDataForRemove", default=True)
-	is_old        = bpy.props.BoolProperty(name="OldMode", default=False)
+	sync_bd       = bpy.props.BoolProperty(name="bdimport.RemoveBoneDataNonExistent", default=False)
+	exclude_ikbd  = bpy.props.BoolProperty(name="bdimport.ExcludeIKBoneDataForRemove", default=True)
+	is_old        = False
 	
 	vg_opr = bpy.props.EnumProperty(name="VertexGroup",
 			items=[
-				('add', 'Add', "AddVGDesc", 'PLUS', 0),
-				('exist', 'UseExist', "UseExistDesc", 'BLANK1', 1),
+				('add', 'Add', "bdimport.AddVGDesc", 'PLUS', 0),
+				('exist', 'bdimport.UseExist', "bdimport.UseExistDesc", 'BLANK1', 1),
 			],
 			default='exist'
 		)
+	act_mode = bpy.props.EnumProperty(name="ActMode",
+			items = [
+				('normal','bdimport.NormalMode','bdimport.NormalModeDesc', 'PROP_CON', 0),
+				('auto','bdimport.AutoDetect', 'bdimport.AutoDetectDesc', 'PROP_ON', 1),
+				('old','bdimport.OldMode', 'bdimport.OldModeDesc', 'PROP_OFF', 2),
+			], default='normal')
 	
 	bonedata_idx = 0
 	bd_dic = {}
@@ -98,7 +104,6 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 	treated_bones = set()
 	count_bd_add, count_bd_update = 0, 0
 	count_lbd_add, count_lbd_update = 0, 0
-	is_mesh = False
 	
 	@classmethod
 	def poll(cls, context):
@@ -127,7 +132,14 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.target_data = ob.parent.data
 			self.target_bones = ob.parent.data.bones
 			self.is_mesh = True
-		self.is_old = False
+		
+		# 前回が自動判定以外の場合、ボーン情報をチェック
+		if self.act_mode != 'auto':
+			ret = self.check_old()
+			if ret > 0:
+				self.act_mode = 'old'
+			elif ret == 0:
+				self.act_mode = 'normal'
 
 		return context.window_manager.invoke_props_dialog(self)
 
@@ -142,7 +154,10 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		row.prop(self, 'import_lbd', icon='NONE')
 		self.layout.prop(self, 'sync_bd', icon='ERROR')
 		self.layout.prop(self, 'exclude_ikbd', icon='NONE')
-		self.layout.prop(self, 'is_old', icon='NONE')
+		
+		self.layout.label(text="bdimport.ActionMode:", icon='HAND')
+		self.layout.prop(self, 'act_mode', icon='NONE', expand=True)
+		
 		
 		ob = context.active_object
 		if ob.type == 'MESH':
@@ -157,8 +172,11 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		self.treated_bones.clear()
 
 		self.bone_names.clear()
-		if not self.is_old:
-			self.is_old = self.check_old()
+		self.is_old = False
+		if self.act_mode == 'auto':
+			self.is_old = (self.check_old() > 0)
+		elif self.act_mode == 'old':
+			self.is_old = True
 		
 		for target_bone in self.target_bones:
 			bone_name = common.remove_serial_num(target_bone.name)
@@ -258,7 +276,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.count_bd_add, self.count_bd_update, count_bd_del,
 			self.count_lbd_add,self.count_lbd_update, count_lbd_del,
 			msgopt)
-		self.report(type={'INFO'}, message="ImportCompleted." + logmsg)
+		self.report(type={'INFO'}, message="bdimport.ImportCompleted." + logmsg)
 		return {'FINISHED'}
 	
 	def parse_bonedata(self):
@@ -374,23 +392,23 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		change_items.clear()
 	
 	# 旧版の取り込みデータであるかの判定 (やっつけ)
-	# return True => 旧版
+	# return 1 => 旧版 (0 => 新版, -1 => 不明)
 	def check_old(self):
 		if 'Bip01' in self.target_bones:
 			if round(self.target_bones['Bip01'].length - 1.0, 6) == 0:
-				return False
+				return 0
 			else:
-				return True
+				return 1
 		else:
 			for target_bone in self.target_bones:
 				if target_bone.parent and len(target_bone.children) == 0:
 					# 末端ボーンの長さで判断
 					baselength = target_bone.parent.length * 0.5
 					if round(target_bone.length - baselength, 6) == 0:
-						return False
+						return 0
 					elif round(target_bone.length - 0.1, 6) == 0:
-						return True
-		return False
+						return 1
+		return -1
  	
 	def calc_bonedata(self, targetbone, recursive=False):
 		bone_name = targetbone.name
@@ -424,6 +442,9 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			else:
 				parentbone_name = common.remove_serial_num(targetbone.parent.name)
 				
+				# bone_mat = bone_d.parent.matrix_local.inverted() * bone_d.matrix_local
+				# bone_v = bone_mat.to_translation() / self.scale
+				# bone_q = bone_mat.to_quaternion()
 				bone_v = (bone_d.head_local - bone_d.parent.head_local)*bone_d.parent.matrix_local / self.scale
 				bone_q = bone_d.matrix.to_3x3().to_quaternion()
 				if self.is_old:
