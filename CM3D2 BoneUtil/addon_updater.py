@@ -57,6 +57,7 @@ class update_cm3d2_boneutil(bpy.types.Operator):
 
 class VersionHistory:
 	updated_time = None
+	vers = []
 	titles = []
 	updates = []
 	links = []
@@ -71,14 +72,18 @@ class VersionHistory:
 		res = urllib.request.urlopen(url)
 		json_data = json.loads(res.read().decode('utf-8'))
 
+		vers = []
 		titles = []
 		updates = []
 		links = []
 
 		for rel in json_data:
 			if rel['prerelease']: continue
-			title = rel['tag_name']
+			ver = rel['tag_name']
 			assets = rel['assets']
+			body = rel['body'].split("\n", 1)[0].strip()
+			if len(body) >= 64: body = body[0:63]
+			title = ver + " " + body
 			
 			if len(assets) > 0 and 'browser_download_url' in assets[0]:
 				dl_link = assets[0]['browser_download_url']
@@ -89,15 +94,17 @@ class VersionHistory:
 			if len(update) < 19: continue
 			
 			updates.append( datetime.datetime.strptime(update[0:19], '%Y-%m-%dT%H:%M:%S') )
+			vers.append(ver)
 			titles.append(title)
 			links.append(link)
 		
 		self.titles = titles
+		self.vers   = vers
 		self.updates = updates
 		self.links = links
 		self.updated_time = now
-		if len(self.titles) > 0:
-			self.latest_version = self.titles[0]
+		if len(self.vers) > 0:
+			self.latest_version = self.vers[0]
 			try:
 				self.latest_ver = [ int(v) for v in self.latest_version.split('.') ]
 			except:
