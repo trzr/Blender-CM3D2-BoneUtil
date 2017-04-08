@@ -8,7 +8,7 @@
 
 ## ■ インストール (Installation)
 #### ◇事前準備
-　Blender2.76以上(動作確認は[2.78][blender278])がインストールされていることが前提です。
+　Blender2.76以上(動作確認は[2.78c][blender278])がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
 　[Releases][]のリンク先にある該当バージョンか、
@@ -29,9 +29,8 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 　Blenderを起動し、ユーザー設定のアドオンタブで「cm3d2」等で検索し、  
 　「Tools: CM3D2 BoneUtil」をオンにすれば(一時的に)有効になります。  
 　次回起動時からも有効にしたい場合は「ユーザー設定の保存」をクリックして下さい。  
-[!]()
 
-
+![UserSave](http://i.imgur.com/2SMHgOQ.png)
 
 ## ■ 提供機能
 
