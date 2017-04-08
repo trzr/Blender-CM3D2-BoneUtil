@@ -235,7 +235,7 @@ class clear_blendsets(bpy.types.Operator):
 			if prop_key.startswith('blendset:'):
 				del props[prop_key]
 		
-		msg = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('shapekey.ClearBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
@@ -452,7 +452,7 @@ class copy_blendset(bpy.types.Operator):
 				output_text += "\t" + key + "\n\t{0:g}\n".format(key_val)
 		
 		context.window_manager.clipboard = output_text
-		msg = bpy.app.translations.pgettext('shapekey.PasteBlendset.Finished')
+		msg = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 		
@@ -560,7 +560,7 @@ class import_cm3d2_menu(bpy.types.Operator):
 		finally:
 			file.close()
 			
-		msg = bpy.app.translations.pgettext('shapekey.PasteBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('shapekey.Menu.BlendsetsImport.Finished')
 		self.report(type={'INFO'}, message=msg % set_item_count)
 		return {'FINISHED'}
 
