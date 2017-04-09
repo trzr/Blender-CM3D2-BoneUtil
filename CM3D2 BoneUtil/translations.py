@@ -123,6 +123,16 @@ dic = {
 		("*", "shapekey.Menu.SaveFilenameDesc") : "overwrite menu file if name is empty.",
 		("*", "shapekey.Menu.FailedToParsefile.Export") : "failed to parse menu file (%s) for export",
 		("*", "shapekey.Menu.BlendsetsExport.Finished") : "blendset export finished. menu file:%s",
+		("*", "shapekey.Menu.BackupExt") : "Extension for backup (Invalid in blanks)",
+		("*", "shapekey.Menu.BackupExtDesc") : "use this extension for backup when menu file export. Invalid in blanks",
+		("*", "shapekey.Menu.File") : "menu file",
+		("*", "shapekey.Menu.InitFolder") : "init folder to select menu file",
+		("*", "shapekey.Menu.TargetDir") : "directory for menu file",
+		("*", "shapekey.Menu.TargetDirDesc") : "specify folder to select menu file",
+		("*", "shapekey.Menu.DefaultPath.Import") : "default path for import menu-file",
+		("*", "shapekey.Menu.DefaultPath.ImportDesc") : "default path for import menu-file.",
+		("*", "shapekey.Menu.DefaultPath.Export") : "default path for export menu-file",
+		("*", "shapekey.Menu.DefaultPath.ExportDesc") : "default path for export menu-file.",
 	},
 	"ja_JP" : {
 		("*", "AddonDesc") : "カスタムメイド3D2のボーン関連の補助機能を提供します",
@@ -247,6 +257,15 @@ dic = {
 		("*", "shapekey.Menu.SaveFilenameDesc") : "未指定の場合は、ベースとなるmenuファイルを上書きします",
 		("*", "shapekey.Menu.FailedToParsefile.Export") : "エクスポート処理のベースとするmenuファイル(%s)の読み込み中に問題が発生しました",
 		("*", "shapekey.Menu.BlendsetsExport.Finished") : "blendset情報をmenuファイルに出力しました:%s",
-		
+		("*", "shapekey.Menu.BackupExt") : "バックアップの拡張子 (空欄で無効)",
+		("*", "shapekey.Menu.BackupExtDesc") : "エクスポート時にバックアップをこの拡張子で作成します、空欄でバックアップを無効",
+		("*", "shapekey.Menu.File") : "menuファイル",
+		("*", "shapekey.Menu.InitFolder") : "menuファイル選択の初期フォルダ",
+		("*", "shapekey.Menu.TargetDir") : "menuファイル配置ディレクトリ",
+		("*", "shapekey.Menu.TargetDirDesc") : "設定すれば、menuを扱う時は必ずここからファイル選択を始めます",
+		("*", "shapekey.Menu.DefaultPath.Import") : "menuインポート時のデフォルトパス",
+		("*", "shapekey.Menu.DefaultPath.ImportDesc") : "menuインポート時に最初はこのパスが表示されます、インポート毎に保存されます",
+		("*", "shapekey.Menu.DefaultPath.Export") : "menuエクスポート時のデフォルトパス",
+		("*", "shapekey.Menu.DefaultPath.ExportDesc") : "menuエクスポート時に最初はこのパスが表示されます、エクスポート毎に保存されます",
 	}
 }

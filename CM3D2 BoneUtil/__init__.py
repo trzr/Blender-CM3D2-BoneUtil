@@ -40,10 +40,10 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bonetype_renamer = bpy.props.BoolProperty(name="ChangeBoneTypeFeature", description="ChangeBoneTypeFDesc", default=False )
 	bsimp = bpy.props.BoolProperty(name="shapekey.BsImporterFeature", description="shapekey.BsImporterFDesc", default=True )
 	
-	backup_ext = bpy.props.StringProperty(name="バックアップの拡張子 (空欄で無効)", description="エクスポート時にバックアップをこの拡張子で作成します、空欄でバックアップを無効", default='bak')
-	menu_default_path = bpy.props.StringProperty(name="menuファイル配置ディレクトリ", subtype='DIR_PATH', description="設定すれば、menuを扱う時は必ずここからファイル選択を始めます")
-	menu_import_path  = bpy.props.StringProperty(name="menuインポート時のデフォルトパス", subtype='FILE_PATH', description="menuインポート時に最初はここが表示されます、インポート毎に保存されます")
-	menu_export_path  = bpy.props.StringProperty(name="menuエクスポート時のデフォルトパス", subtype='FILE_PATH', description="menuエクスポート時に最初はここが表示されます、エクスポート毎に保存されます")
+	backup_ext = bpy.props.StringProperty(name="shapekey.Menu.BackupExt", description="shapekey.Menu.BackupExtDesc", default='bak')
+	menu_default_path = bpy.props.StringProperty(name="shapekey.Menu.TargetDir", subtype='DIR_PATH', description="shapekey.Menu.TargetDirDesc")
+	menu_import_path  = bpy.props.StringProperty(name="shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH', description="shapekey.Menu.DefaultPath.ImportDesc")
+	menu_export_path  = bpy.props.StringProperty(name="shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH', description="shapekey.Menu.DefaultPath.ExportDesc")
 	
 	update_history = addon_updater.VersionHistory()
 	update_history.now_ver = [ v for v in bl_info['version'] ]
@@ -61,8 +61,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		
 		box = layout.box()
 		box.prop(self, 'backup_ext', icon='FILE_BACKUP')
-		box.label(text="menuファイル", icon='FILE_IMAGE')
-		box.prop(self, 'menu_default_path', icon='FILESEL', text="menuファイル選択時の初期フォルダ")
+		box.label(text="shapekey.Menu.File", icon='FILE_IMAGE')
+		box.prop(self, 'menu_default_path', icon='FILESEL', text="shapekey.Menu.InitFolder")
 		
 		row = layout.row()
 		
