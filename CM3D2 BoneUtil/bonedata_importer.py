@@ -229,7 +229,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 				# BoneDataの削除
 				for bdata1 in self.bd_dic.values():
 					if bdata1.no_exist:
-						if self.exclude_ikbd and bdata1.name.startswith('_IK_'): continue
+						if self.exclude_ikbd and '_IK_' in bdata1.name: continue
 						if bdata1.is_nub and bdata1.parent_name in self.bone_names: continue
 						
 						del self.target_props[ bdata1.prop_name ]
