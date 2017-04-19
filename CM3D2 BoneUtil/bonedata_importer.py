@@ -32,14 +32,11 @@ def menu_func_arm(self, context):
 
 def menu_func_common(self, context):
 	layout = self.layout
-	row = layout.row()
-	col = row.column()
+	split = layout.split(0.3, align=True)
+	split.label(text="bdimport.ImportBoneData4CM3D2", icon='IMPORT')
 	
-	col = self.layout.column(align=True)
-	col.label(text="bdimport.ImportBoneData4CM3D2", icon='IMPORT')
-	row = col.row(align=True)
 	label = bpy.app.translations.pgettext('bdimport.ImportBoneData')
-	row.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
+	split.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
 
 class BoneData1(object):
 	def __init__(self, name, sclflag, parent_name, prop_name):
@@ -276,7 +273,8 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.count_bd_add, self.count_bd_update, count_bd_del,
 			self.count_lbd_add,self.count_lbd_update, count_lbd_del,
 			msgopt)
-		self.report(type={'INFO'}, message="bdimport.ImportCompleted." + logmsg)
+		msg = bpy.app.translations.pgettext('bdimport.ImportCompleted') + logmsg
+		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 	
 	def parse_bonedata(self):
@@ -476,7 +474,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			
 			# add bonedata "_nub"
 			if not is_nub and len(targetbone.children) == 0:
-				# 長さが基準のままであればnub不要と判断 (有効数字7桁で判断失敗するボーンあり)
+				# 長さが基準のままであればnub不要と判断
 				if self.is_old:
 					base_length = 0.2 * self.scale if targetbone.parent is None else 0.1
 				else:

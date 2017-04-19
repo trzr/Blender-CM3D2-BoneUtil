@@ -18,7 +18,7 @@ dic = {
 
 		("*", "Import") : "Import",
 		("*", "Export") : "Export",
-		("*", "bdimport.ImportBoneData4CM3D2") : "Import BoneData for CM3D2",
+		("*", "bdimport.ImportBoneData4CM3D2") : "for CM3D2",
 		("*", "bdimport.ImportBoneData") : "Import To BoneData",
 		("*", "bdimport.ImportBoneDataDesc") : "Convert blender's bone objects to BoneData for CM3D2",
 		("*", "bdimport.RemoveBoneDataNonExistent") : "Remove  BoneData (non-existent bone)",
@@ -152,7 +152,7 @@ dic = {
 		
 		("*", "Import") : "インポート",
 		("*", "Export") : "エクスポート",
-		("*", "bdimport.ImportBoneData4CM3D2") : "CM3D2用 BoneData取込み",
+		("*", "bdimport.ImportBoneData4CM3D2") : "CM3D2用",
 		("*", "bdimport.ImportBoneData") : "BoneData取込み",
 		("*", "bdimport.ImportBoneDataDesc") : "Blender上のボーンからCM3D2で使われるBoneDataに変換します",
 		("*", "bdimport.RemoveBoneDataNonExistent") : "存在しないボーンのBoneData削除",
