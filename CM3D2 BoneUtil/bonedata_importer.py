@@ -498,8 +498,13 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 					if nub_bonename is None:
 						self.count_bd_add += 1
 						idx = bone_name.rfind('_yure_')
-						if idx == -1: nub_bonename = bone_name + "_nub"
-						else        : nub_bonename = bone_name.replace('_yure_', '_') + "_nub"
+						if idx == -1: nub_bonename = bone_name
+						else        : nub_bonename = bone_name.replace('_yure_', '_')
+						
+						if nub_bonename.endswith('_'):
+							nub_bonename = nub_bonename + 'nub'
+						else: 
+							nub_bonename = nub_bonename + '_nub'
 						
 						suf = 1
 						while nub_bonename in self.treated_bones:
