@@ -37,6 +37,96 @@ def menu_func_common(self, context):
 	
 	label = bpy.app.translations.pgettext('bdimport.ImportBoneData')
 	split.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
+	label = bpy.app.translations.pgettext('bdimport.RenameBaseBone')
+	split.operator('object.rename_cm3d2_basebone', icon='BONE_DATA', text=label)
+
+class rename_cm3d2_basebone(bpy.types.Operator):
+	bl_idname = 'object.rename_cm3d2_basebone'
+	bl_label       = 'Rename BaseBone'
+	bl_description = bpy.app.translations.pgettext('bdimport.RenameBaseBoneDesc')
+	bl_options = {'REGISTER', 'UNDO'}
+	
+	bb_name      = bpy.props.StringProperty(name="BaseBoneName")
+	bb_name_old  = None
+	target_props = None
+	change_bonename = bpy.props.BoolProperty(name="RenameBone", default=False)
+	
+	@classmethod
+	def poll(cls, context):
+		ob = context.active_object
+		if ob:
+			if ob.type == 'ARMATURE':
+				return 'BaseBone' in ob.data
+			elif ob.type == 'MESH':
+				if ob.parent and ob.parent.type == 'ARMATURE':
+					return 'BaseBone' in ob
+
+		return False
+
+	def invoke(self, context, event):
+		ob = context.active_object
+		if ob.type == 'ARMATURE':
+			self.bb_name = ob.data['BaseBone']
+			self.target_props = ob.data
+			self.target_data = ob.data
+			self.is_mesh = False
+		elif ob.type == 'MESH':
+			self.bb_name = ob['BaseBone']
+			self.target_props = ob
+			self.target_data = ob.parent.data
+			self.is_mesh = True
+			
+		self.bb_name_old = self.bb_name
+		return context.window_manager.invoke_props_dialog(self)
+
+	def draw(self, context):
+		self.layout.prop(self, 'bb_name', icon='SORTALPHA')
+		#self.layout.prop(self, 'target_type', icon='BONE_DATA')
+		
+		target_bones = self.target_data.bones
+		if target_bones and self.bb_name_old in target_bones:
+			row = self.layout.row(align=True)
+			row.prop(self, 'change_bonename', icon='NONE')
+
+	def execute(self, context):
+		old_bb_name = self.target_props['BaseBone']
+		if self.bb_name == old_bb_name:
+			self.report(type={'INFO'}, message="BaseBone is not changed.")
+			return {'CANCELLED'}
+		
+		target_name = None
+		for item in self.target_props.items():
+			prop_name = item[0]
+			if prop_name.startswith('BoneData:'):
+				try:
+					bonedata_txt = item[1]
+					bdlist = bonedata_txt.split(',', 1)
+					if len(bdlist) < 1 : continue
+					
+					if old_bb_name == bdlist[0]:
+						bdlist[0] = self.bb_name
+						self.target_props[prop_name] = bdlist[0] + ',' + bdlist[1]
+						self.target_props['BaseBone'] = self.bb_name
+						target_name = prop_name
+						break
+				except:
+					pass
+		
+		if self.change_bonename:
+			ob = context.active_object
+			if ob.type == 'MESH':
+				target_bones = context.active_object.parent.data.bones
+			elif ob.type == 'ARMATURE':
+				target_bones = context.active_object.data.bones
+			
+			if old_bb_name in target_bones:
+				target_bones[old_bb_name].name = self.bb_name
+		
+		if target_name:
+			msg = bpy.app.translations.pgettext('bdimport.RenameBaseBoneCompleted')
+			self.report(type={'INFO'}, message=msg + ' ' + str(target_name))
+		
+		return {'FINISHED'}
 
 class BoneData1(object):
 	def __init__(self, name, sclflag, parent_name, prop_name):
@@ -154,7 +244,6 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		
 		self.layout.label(text="bdimport.ActionMode:", icon='HAND')
 		self.layout.prop(self, 'act_mode', icon='NONE', expand=True)
-		
 		
 		ob = context.active_object
 		if ob.type == 'MESH':
