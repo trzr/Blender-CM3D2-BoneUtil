@@ -271,13 +271,17 @@ class reflect_blendset(bpy.types.Operator):
 			if len(val) > 2:
 				entry = val.split(' ')
 				try:
-					key = entry[0].lower()
+					key = entry[0]
 					numval = float(entry[1])
 					if key in key_blocks:
 						key_blocks[key].value = numval/100
 					else:
-						msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
-						self.report(type={'WARNING'}, message=msg % key)
+						keyL = key.lower()
+						if key != keyL and keyL in key_blocks:
+							key_blocks[keyL].value = numval/100
+						else:
+							msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
+							self.report(type={'WARNING'}, message=msg % key)
 				except:
 					continue
 		
@@ -413,12 +417,15 @@ class paste_blendset(bpy.types.Operator):
 			
 			try:
 				numval = float(val)
-				key = key.lower()
 				if key in key_blocks:
 					key_blocks[key].value = numval/100
 				else:
-					msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
-					self.report(type={'WARNING'}, message=msg % key)
+					keyL = key.lower()
+					if key != keyL and keyL in key_blocks:
+						key_blocks[keyL].value = numval/100
+					else:
+						msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
+						self.report(type={'WARNING'}, message=msg % key)
 			except:
 				key = val
 				continue
@@ -652,7 +659,6 @@ class export_cm3d2_menu(bpy.types.Operator):
 				length = struct.unpack('<B', infile.read(1))[0]
 				exported_blendset = False
 				while (length > 0):
-					
 					key = common.read_str(infile)
 					if key == 'blendset':
 						for i in range(length-1):
