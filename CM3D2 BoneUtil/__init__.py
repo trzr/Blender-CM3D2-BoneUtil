@@ -4,7 +4,7 @@ bl_info = {
 	"version" : (0, 2, 13),
 	"blender" : (2, 76, 0),
 	"location" : "AddonDesc",
-	"description" : "",
+	"description" : "Bone data utility for CM3D2",
 	"warning" : "",
 	"wiki_url" : "https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki",
 	"tracker_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/issues",
@@ -37,13 +37,13 @@ import bpy, os.path, bpy.utils.previews
 class AddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 	
-	bonetype_renamer = bpy.props.BoolProperty(name="ChangeBoneTypeFeature", description="ChangeBoneTypeFDesc", default=False )
-	bsimp = bpy.props.BoolProperty(name="shapekey.BsImporterFeature", description="shapekey.BsImporterFDesc", default=True )
+	bonetype_renamer = bpy.props.BoolProperty(name="butl.ChangeBoneTypeFeature", description="butl.ChangeBoneTypeFDesc", default=False )
+	bsimp = bpy.props.BoolProperty(name="butl.shapekey.BsImporterFeature", description="butl.shapekey.BsImporterFDesc", default=True )
 	
-	backup_ext = bpy.props.StringProperty(name="shapekey.Menu.BackupExt", description="shapekey.Menu.BackupExtDesc", default='bak')
-	menu_default_path = bpy.props.StringProperty(name="shapekey.Menu.TargetDir", subtype='DIR_PATH', description="shapekey.Menu.TargetDirDesc")
-	menu_import_path  = bpy.props.StringProperty(name="shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH', description="shapekey.Menu.DefaultPath.ImportDesc")
-	menu_export_path  = bpy.props.StringProperty(name="shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH', description="shapekey.Menu.DefaultPath.ExportDesc")
+	backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt", description="butl.shapekey.Menu.BackupExtDesc", default='bak')
+	menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH', description="butl.shapekey.Menu.TargetDirDesc")
+	menu_import_path  = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH', description="butl.shapekey.Menu.DefaultPath.ImportDesc")
+	menu_export_path  = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH', description="butl.shapekey.Menu.DefaultPath.ExportDesc")
 	
 	update_history = addon_updater.VersionHistory()
 	update_history.now_ver = [ v for v in bl_info['version'] ]
@@ -51,9 +51,9 @@ class AddonPreferences(bpy.types.AddonPreferences):
 
 	def draw(self, context):
 		layout = self.layout
-		layout.label(text="PushSaveButton", icon='QUESTION')
+		layout.label(text="butl.PushSaveButton", icon='QUESTION')
 		box = layout.box()
-		box.label(text="EnableOption", icon='DOT')
+		box.label(text="butl.EnableOption", icon='DOT')
 		row = box.row()
 		split = row.split(percentage=0.3, align=True)
 		split.prop(self, 'bonetype_renamer', icon='NONE')
@@ -61,8 +61,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		
 		box = layout.box()
 		box.prop(self, 'backup_ext', icon='FILE_BACKUP')
-		box.label(text="shapekey.Menu.File", icon='FILE_IMAGE')
-		box.prop(self, 'menu_default_path', icon='FILESEL', text="shapekey.Menu.InitFolder")
+		box.label(text="butl.shapekey.Menu.File", icon='FILE_IMAGE')
+		box.prop(self, 'menu_default_path', icon='FILESEL', text="butl.shapekey.Menu.InitFolder")
 		
 		row = layout.row()
 		
@@ -70,11 +70,11 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		row.menu('INFO_MT_CM3D2_BoneUtil_history', icon='INFO')
 		
 		v = self.version
-		if self.update_history.has_update(): 
+		if self.update_history.has_update():
 			v += ' => ' + self.update_history.latest_version
 		row.label(text=v)
-		row.operator('script.update_cm3d2_boneutil', icon='FILE_REFRESH')
-	
+		row.operator('script.trzr_update_cm3d2_boneutil', icon='FILE_REFRESH')
+
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.app.translations.register(__name__, translations.dic)

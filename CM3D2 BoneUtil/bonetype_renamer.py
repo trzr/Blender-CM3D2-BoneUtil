@@ -1,6 +1,6 @@
 import os, sys, bpy, math, mathutils
 from . import common
-# メニュー等に項目追加
+
 def menu_func(self, context):
 	if not common.prefs().bonetype_renamer: return
 	
@@ -36,7 +36,7 @@ def menu_func_common(self, context, ui_list):
 	row = layout.row()
 	col = row.column()
 	split = col.split(percentage=0.85, align=True)
-	split.label(text="ChangeBoneType", icon='BONE_DATA')
+	split.label(text="butl.ChangeBoneType", icon='BONE_DATA')
 	if ybl.display_ybl:
 		split.prop(ybl, "display_ybl", text="", icon='TRIA_DOWN')# icon='DOWNARROW_HLT')
 	else:
@@ -50,8 +50,8 @@ def menu_func_common(self, context, ui_list):
 		#ui_list = context.window_manager.my_bone_list
 		col.template_list("YureBoneList", "", ui_list, "yure_bones", ui_list, "item_idx", rows=2)
 		col = row.column(align=True)
-		col.operator("custom.yurebonelist_select_all", icon='ZOOMIN', text="")
-		col.operator("custom.yurebonelist_deselect_all", icon='ZOOMOUT', text="")
+		col.operator(BoneListSelectOperator.bl_idname, icon='ZOOMIN', text="")
+		col.operator(BoneListDeselectOperator.bl_idname, icon='ZOOMOUT', text="")
 		
 		row = box.row()
 		col = row.column(align=True)
@@ -64,8 +64,8 @@ def menu_func_common(self, context, ui_list):
 		# 	row = layout.row()
 		# 	row.prop(ui_list.yure_bones[ui_list.item_idx], "selected")
 		row = box.row()
-		label = bpy.app.translations.pgettext('ChangeBoneType')
-		row.operator("custom.change_bonetype", text=label)
+		label = bpy.app.translations.pgettext('butl.ChangeBoneType')
+		row.operator(BoneTypeChangeOperator.bl_idname, text=label)
 
 def refresh_bonelist(self, context, ui_list, target_bones):
 	# 前回の選択状態を保持
@@ -124,7 +124,7 @@ class ItemGroup(bpy.types.PropertyGroup):
 	target_type = bpy.props.EnumProperty(name="BoneType", items=YureBoneItem.bone_types, default='soft')
 
 class BoneListSelectItemOperator(bpy.types.Operator):
-	bl_idname = "custom.bonelist_select_item"
+	bl_idname = "custom.trzr_bonelist_select_item"
 	bl_label  = "Select Item"
 	
 	opr_type = bpy.props.StringProperty(default='')
@@ -150,7 +150,7 @@ class ULItems(bpy.types.UIList):
 		col1.prop(item, "name", text="", emboss=False, translate=False, icon_value=icon) #icon='NONE')
 
 class BoneListSelectOperator(bpy.types.Operator):
-	bl_idname = "custom.yurebonelist_select_all"
+	bl_idname = "custom.trzr_yurebonelist_select_all"
 	bl_label = "Select All"
 	
 	def execute(self, context):
@@ -159,7 +159,7 @@ class BoneListSelectOperator(bpy.types.Operator):
 		return {'FINISHED'}
 
 class BoneListDeselectOperator(bpy.types.Operator):
-	bl_idname = "custom.yurebonelist_deselect_all"
+	bl_idname = "custom.trzr_yurebonelist_deselect_all"
 	bl_label = "Deselect All"
 	
 	def execute(self, context):
@@ -177,8 +177,8 @@ class CheckList(bpy.types.UIList):
 		split.label(text=item.name, translate=False, icon='NONE' )
 		split.label(text=item.replaced_name, translate=False, icon='NONE')
 
-class ChangeBoneTypeOperator(bpy.types.Operator):
-	bl_idname = "custom.change_bonetype"
+class BoneTypeChangeOperator(bpy.types.Operator):
+	bl_idname = "custom.trzr_change_bonetype"
 	bl_label = "change bone type"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -220,9 +220,10 @@ class ChangeBoneTypeOperator(bpy.types.Operator):
 		self.replace_props(context, rename_list)
 		
 		# 処理件数を出力する。BoneData数, LocalBoneData数
-		logmsg = "Count BoneData:%d(parent:%d),LocalBoneData:%d)" % (
+		msg = bpy.app.translations.pgettext('butl.ChangeBoneTypeCompleted')
+		logmsg = ". Count BoneData:%d(parent:%d),LocalBoneData:%d)" % (
 			self.count_bd_replace, self.count_bdp_replace, self.count_lbd_replace)
-		self.report(type={'INFO'}, message="ChangeBoneTypeCompleted." + logmsg)
+		self.report(type={'INFO'}, message=msg + logmsg)
 		ui_list = context.window_manager.my_bone_list
 		return {'FINISHED'}
 
@@ -288,7 +289,7 @@ class YureBoneList(bpy.types.UIList):
 		split.label(text=item.bone_type, translate=False, icon='NONE')
 
 class YureBoneProps(bpy.types.PropertyGroup):
-	display_ybl = bpy.props.BoolProperty(name = "Bones List",
+	display_ybl = bpy.props.BoolProperty(name = "butl.BonesList",
 		description = "Display Yure Bone List",
 		default = False)
 

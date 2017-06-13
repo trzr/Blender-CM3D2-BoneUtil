@@ -1,10 +1,10 @@
 import bpy
 from . import common
 
-class update_cm3d2_boneutil(bpy.types.Operator):
-	bl_idname = 'script.update_cm3d2_boneutil'
+class CM3D2BoneUtilUpdater(bpy.types.Operator):
+	bl_idname = 'script.trzr_update_cm3d2_boneutil'
 	bl_label       = 'Update'
-	bl_description = bpy.app.translations.pgettext('updater.Desc')
+	bl_description = bpy.app.translations.pgettext('butl.updater.Desc')
 	bl_options = {'REGISTER'}
 	
 	@classmethod
@@ -46,7 +46,7 @@ class update_cm3d2_boneutil(bpy.types.Operator):
 		hist.now_ver = hist.latest_ver
 		ver = '.'.join([ str(v) for v in hist.now_ver ])
 		common.prefs().version = ver
-		self.report(type={'INFO'}, message=bpy.app.translations.pgettext('updater.Finished') % ver)
+		self.report(type={'INFO'}, message=bpy.app.translations.pgettext('butl.updater.Finished') % ver)
 		try:
 			bpy.ops.wm.addon_disable(module=__name__)
 			bpy.ops.wm.addon_enable(module=__name__)
@@ -125,7 +125,7 @@ class VersionHistory:
 # 更新履歴メニュー
 class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 	bl_idname = 'INFO_MT_CM3D2_BoneUtil_history'
-	bl_label = bpy.app.translations.pgettext('updater.History')
+	bl_label = bpy.app.translations.pgettext('butl.updater.History')
 	
 	def draw(self, context):
 		import datetime
@@ -139,7 +139,7 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 			try:
 				hist.update(now)
 			except TypeError:
-				self.layout.label(text=bpy.app.translations.pgettext('updater.History'), icon='ERROR')
+				self.layout.label(text=bpy.app.translations.pgettext('butl.updater.History'), icon='ERROR')
 				return
 
 		utcnow = datetime.datetime.utcnow()
@@ -159,16 +159,16 @@ class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):
 				icon = 'PREVIEW_RANGE'
 			
 			if diff_seconds.days:
-				date_str = bpy.app.translations.pgettext('updater.HistoryDays') % diff_seconds.days
+				date_str = bpy.app.translations.pgettext('butl.updater.HistoryDays') % diff_seconds.days
 			elif 60 * 60 <= diff_seconds.seconds:
-				date_str = bpy.app.translations.pgettext('updater.HistoryHours') % int(diff_seconds.seconds / (60 * 60))
+				date_str = bpy.app.translations.pgettext('butl.updater.HistoryHours') % int(diff_seconds.seconds / (60 * 60))
 			elif 60 <= diff_seconds.seconds:
-				date_str = bpy.app.translations.pgettext('updater.HistoryMins') % int(diff_seconds.seconds / 60)
+				date_str = bpy.app.translations.pgettext('butl.updater.HistoryMins') % int(diff_seconds.seconds / 60)
 			else:
-				date_str = bpy.app.translations.pgettext('updater.HistorySecs') % diff_seconds.seconds
+				date_str = bpy.app.translations.pgettext('butl.updater.HistorySecs') % diff_seconds.seconds
 			
 			text = "(" + date_str + ") " + title
 			self.layout.operator('wm.url_open', text=text, icon=icon).url = link[0]
 			count += 1
 
-		self.layout.label(text=bpy.app.translations.pgettext('updater.HistoryUpdated:') + hist.updated_time.strftime('%Y-%m-%d %H:%M:%S'))
+		self.layout.label(text=bpy.app.translations.pgettext('butl.updater.HistoryUpdated:') + hist.updated_time.strftime('%Y-%m-%d %H:%M:%S'))

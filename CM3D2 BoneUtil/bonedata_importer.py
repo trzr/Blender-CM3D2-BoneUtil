@@ -33,23 +33,23 @@ def menu_func_arm(self, context):
 def menu_func_common(self, context):
 	layout = self.layout
 	split = layout.split(0.3, align=True)
-	split.label(text="bdimport.ImportBoneData4CM3D2", icon='IMPORT')
+	split.label(text="butl.bdimport.ImportBoneData4CM3D2", icon='IMPORT')
 	
-	label = bpy.app.translations.pgettext('bdimport.ImportBoneData')
-	split.operator('object.import_cm3d2_bonedata', icon='CONSTRAINT_BONE', text=label)
-	label = bpy.app.translations.pgettext('bdimport.RenameBaseBone')
-	split.operator('object.rename_cm3d2_basebone', icon='BONE_DATA', text=label)
+	label = bpy.app.translations.pgettext('butl.bdimport.ImportBoneData')
+	split.operator(CM3D2BoneDataImporter.bl_idname, icon='CONSTRAINT_BONE', text=label)
+	label = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBone')
+	split.operator(CM3D2BaseBoneRenamer.bl_idname, icon='BONE_DATA', text=label)
 
-class rename_cm3d2_basebone(bpy.types.Operator):
-	bl_idname = 'object.rename_cm3d2_basebone'
+class CM3D2BaseBoneRenamer(bpy.types.Operator):
+	bl_idname = 'object.trzr_rename_cm3d2_basebone'
 	bl_label       = 'Rename BaseBone'
-	bl_description = bpy.app.translations.pgettext('bdimport.RenameBaseBoneDesc')
+	bl_description = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBoneDesc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
-	bb_name      = bpy.props.StringProperty(name="BaseBoneName")
+	bb_name      = bpy.props.StringProperty(name="butl.BaseBoneName")
 	bb_name_old  = None
 	target_props = None
-	change_bonename = bpy.props.BoolProperty(name="RenameBone", default=False)
+	change_bonename = bpy.props.BoolProperty(name="butl.RenameBone", default=False)
 	
 	@classmethod
 	def poll(cls, context):
@@ -123,7 +123,7 @@ class rename_cm3d2_basebone(bpy.types.Operator):
 				target_bones[old_bb_name].name = self.bb_name
 		
 		if target_name:
-			msg = bpy.app.translations.pgettext('bdimport.RenameBaseBoneCompleted')
+			msg = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBoneCompleted')
 			self.report(type={'INFO'}, message=msg + ' ' + str(target_name))
 		
 		return {'FINISHED'}
@@ -143,38 +143,38 @@ class BoneData1(object):
 		self.parent = None
 		self.no_exist = False
 
-class import_cm3d2_bonedata(bpy.types.Operator):
-	bl_idname = 'object.import_cm3d2_bonedata'
+class CM3D2BoneDataImporter(bpy.types.Operator):
+	bl_idname = 'object.trzr_import_cm3d2_bonedata'
 	bl_label       = 'Import BoneData'
-	bl_description = bpy.app.translations.pgettext('bdimport.ImportBoneDataDesc')
+	bl_description = bpy.app.translations.pgettext('butl.bdimport.ImportBoneDataDesc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
-	bb_name       = bpy.props.StringProperty(name="BaseBoneName")
+	bb_name       = bpy.props.StringProperty(name="butl.BaseBoneName")
 	target_items = [
-		('All', 'EnumAll', "", '', 0),
-		('Selected', 'EnumSelected', "", '', 1),
-		('Descendant', 'EnumDescendant', "", '', 2),
+		('All', 'butl.EnumAll', "", '', 0),
+		('Selected', 'butl.EnumSelected', "", '', 1),
+		('Descendant', 'butl.EnumDescendant', "", '', 2),
 	]
 	target_type   = bpy.props.EnumProperty(name="Target",items=target_items, default='Descendant')
-	scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="ScaleDesc")
+	scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="butl.ScaleDesc")
 	import_bd     = bpy.props.BoolProperty(name="BoneData", default=True)
 	import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-	sync_bd       = bpy.props.BoolProperty(name="bdimport.RemoveBoneDataNonExistent", default=False)
-	exclude_ikbd  = bpy.props.BoolProperty(name="bdimport.ExcludeIKBoneDataForRemove", default=True)
+	sync_bd       = bpy.props.BoolProperty(name="butl.bdimport.RemoveBoneDataNonExistent", default=False)
+	exclude_ikbd  = bpy.props.BoolProperty(name="butl.bdimport.ExcludeIKBoneDataForRemove", default=True)
 	is_old        = False
 	
 	vg_opr = bpy.props.EnumProperty(name="VertexGroup",
 			items=[
-				('add', 'Add', "bdimport.AddVGDesc", 'PLUS', 0),
-				('exist', 'bdimport.UseExist', "bdimport.UseExistDesc", 'BLANK1', 1),
+				('add', 'Add', "butl.bdimport.AddVGDesc", 'PLUS', 0),
+				('exist', 'butl.bdimport.UseExist', "butl.bdimport.UseExistDesc", 'BLANK1', 1),
 			],
 			default='exist'
 		)
 	act_mode = bpy.props.EnumProperty(name="ActMode",
 			items = [
-				('normal','bdimport.NormalMode','bdimport.NormalModeDesc', 'PROP_CON', 0),
-				('auto','bdimport.AutoDetect', 'bdimport.AutoDetectDesc', 'PROP_ON', 1),
-				('old','bdimport.OldMode', 'bdimport.OldModeDesc', 'PROP_OFF', 2),
+				('normal','butl.bdimport.NormalMode','butl.bdimport.NormalModeDesc', 'PROP_CON', 0),
+				('auto','butl.bdimport.AutoDetect', 'butl.bdimport.AutoDetectDesc', 'PROP_ON', 1),
+				('old','butl.bdimport.OldMode', 'butl.bdimport.OldModeDesc', 'PROP_OFF', 2),
 			], default='normal')
 	
 	bonedata_idx = 0
@@ -235,19 +235,19 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 		self.layout.prop(self, 'target_type', icon='BONE_DATA')
 		
 		self.layout.prop(self, 'scale', icon='MAN_SCALE')
-		self.layout.label(text="ImportTarget:", icon='IMPORT')
+		self.layout.label(text="butl.ImportTarget:", icon='IMPORT')
 		row = self.layout.row(align=True)
 		row.prop(self, 'import_bd', icon='NONE')
 		row.prop(self, 'import_lbd', icon='NONE')
 		self.layout.prop(self, 'sync_bd', icon='ERROR')
 		self.layout.prop(self, 'exclude_ikbd', icon='NONE')
 		
-		self.layout.label(text="bdimport.ActionMode:", icon='HAND')
+		self.layout.label(text="butl.bdimport.ActionMode:", icon='HAND')
 		self.layout.prop(self, 'act_mode', icon='NONE', expand=True)
 		
 		ob = context.active_object
 		if ob.type == 'MESH':
-			self.layout.label(text="VertexGroup:", icon='GROUP_VERTEX')
+			self.layout.label(text="butl.VertexGroup:", icon='GROUP_VERTEX')
 			self.layout.prop(self, 'vg_opr', icon='NONE', expand=True)
 
 	def execute(self, context):
@@ -286,7 +286,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			bbdata = self.bd_dic.get(self.bb_name)
 			if bbdata is None:
 				# TODO BaseBoneのリネーム/変更
-				msg = 'BaseBone(%s) not found'% self.bb_name
+				msg = 'BaseBone(%s) not found' % self.bb_name
 				self.report(type={'ERROR'}, message=msg)
 				return {'CANCELLED'}
 			
@@ -362,7 +362,7 @@ class import_cm3d2_bonedata(bpy.types.Operator):
 			self.count_bd_add, self.count_bd_update, count_bd_del,
 			self.count_lbd_add,self.count_lbd_update, count_lbd_del,
 			msgopt)
-		msg = bpy.app.translations.pgettext('bdimport.ImportCompleted') + logmsg
+		msg = bpy.app.translations.pgettext('butl.bdimport.ImportCompleted') + logmsg
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 	

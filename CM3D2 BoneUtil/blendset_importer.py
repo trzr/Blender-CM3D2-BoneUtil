@@ -16,26 +16,26 @@ def menu_func(self, context):
 		split.prop(bsl, 'display_box', text="", icon='TRIA_DOWN')
 	else:
 		split.prop(bsl, 'display_box', text="", icon='TRIA_RIGHT')
-	split.label(text="shapekey.BatchOperation", icon='HAND')
+	split.label(text="butl.shapekey.BatchOperation", icon='HAND')
 	
 	if not bsl.display_box: return
 	
 	col = box.column()
 	sub_row1 = col.row(align=True)
-	sub_row1.label(text='shapekey.menuif')
+	sub_row1.label(text='butl.shapekey.menuif')
 	label = bpy.app.translations.pgettext('Import')
-	sub_row1.operator('shapekey.import_cm3d2_menu', icon='IMPORT', text=label)
+	sub_row1.operator(CM3D2MenuImporter.bl_idname, icon='IMPORT', text=label)
 	label = bpy.app.translations.pgettext('Export')
-	sub_row1.operator('shapekey.export_cm3d2_menu', icon='EXPORT', text=label)
+	sub_row1.operator(CM3D2MenuExporter.bl_idname, icon='EXPORT', text=label)
 	
 	sub_row1 = col.row(align=True)
-	sub_row1.label(text='shapekey.BlendsetOpeation')
-	label = bpy.app.translations.pgettext('shapekey.CopySet')
-	sub_row1.operator('shapekey.copy_blendsets', icon='COPYDOWN', text=label)
-	label = bpy.app.translations.pgettext('shapekey.PasteSet')
-	sub_row1.operator('shapekey.paste_blendsets', icon='PASTEDOWN', text=label)
-	label = bpy.app.translations.pgettext('shapekey.ClearSet')
-	sub_row1.operator('shapekey.clear_blendsets', icon='X', text=label)
+	sub_row1.label(text='butl.shapekey.BlendsetOpeation')
+	label = bpy.app.translations.pgettext('butl.shapekey.CopySet')
+	sub_row1.operator(BlendsetsCopier.bl_idname, icon='COPYDOWN', text=label)
+	label = bpy.app.translations.pgettext('butl.shapekey.PasteSet')
+	sub_row1.operator(BlendsetsPaster.bl_idname, icon='PASTEDOWN', text=label)
+	label = bpy.app.translations.pgettext('butl.shapekey.ClearSet')
+	sub_row1.operator(BlendsetsClearer.bl_idname, icon='X', text=label)
 	
 	has_target = False
 	ob = context.active_object
@@ -56,7 +56,7 @@ def menu_func(self, context):
 	
 	sub_row = split.row()
 	bs_count = len(bsl.blendset_items)
-	sub_row.label(text="shapekey.BlendsetList", icon='SHAPEKEY_DATA')
+	sub_row.label(text="butl.shapekey.BlendsetList", icon='SHAPEKEY_DATA')
 	subsub_row = sub_row.row()
 	subsub_row.alignment = 'RIGHT'
 	subsub_row.label(text=str(bs_count), icon='CHECKBOX_HLT')
@@ -76,23 +76,23 @@ def menu_func(self, context):
 		row1 = col.row(align=True)
 		split1 = row1.split(percentage=0.6, align=True)
 		split1.prop(bsl, "target_name", text="")
-		label = bpy.app.translations.pgettext('shapekey.Reflect')
-		split1.operator('shapekey.reflect_blendset', icon='MOVE_DOWN_VEC', text=label)
-		label = bpy.app.translations.pgettext('shapekey.Regist')
-		split1.operator('shapekey.regist_blendset', icon='MOVE_UP_VEC', text=label)
+		label = bpy.app.translations.pgettext('butl.shapekey.Reflect')
+		split1.operator(BlendsetReflector.bl_idname, icon='MOVE_DOWN_VEC', text=label)
+		label = bpy.app.translations.pgettext('butl.shapekey.Regist')
+		split1.operator(BlendsetRegister.bl_idname, icon='MOVE_UP_VEC', text=label)
 		
 		subsplit = split1.split(percentage=0.5, align=True)
-		subsplit.operator('shapekey.add_blendset', icon='ZOOMIN', text='')
-		subsplit.operator('shapekey.del_blendset', icon='ZOOMOUT', text='')
+		subsplit.operator(BlendsetAdder.bl_idname, icon='ZOOMIN', text='')
+		subsplit.operator(BlendsetDeleter.bl_idname, icon='ZOOMOUT', text='')
 	
 	# bottom
 	col = col.column()
 	row = col.row(align=True)
-	row.label(text='shapekey.ShapeKeyVal')
-	label = bpy.app.translations.pgettext('shapekey.CopyValue')
-	row.operator('shapekey.copy_blendset', icon='COPYDOWN', text=label)
-	label = bpy.app.translations.pgettext('shapekey.PasteValue')
-	row.operator('shapekey.paste_blendset', icon='PASTEDOWN', text=label)
+	row.label(text='butl.shapekey.ShapeKeyVal')
+	label = bpy.app.translations.pgettext('butl.shapekey.CopyValue')
+	row.operator(BlendsetCopier.bl_idname, icon='COPYDOWN', text=label)
+	label = bpy.app.translations.pgettext('butl.shapekey.PasteValue')
+	row.operator(BlendsetPaster.bl_idname, icon='PASTEDOWN', text=label)
 	
 
 def refresh_list(self, context, bs_list, target_props):
@@ -102,10 +102,10 @@ def refresh_list(self, context, bs_list, target_props):
 			item = bs_list.blendset_items.add()
 			item.name = propkey[9:]
 
-class paste_blendsets(bpy.types.Operator):
-	bl_idname = 'shapekey.paste_blendsets'
-	bl_label       = bpy.app.translations.pgettext('shapekey.PasteBlendsets')
-	bl_description = bpy.app.translations.pgettext('shapekey.PasteBlendsets.Desc')
+class BlendsetsPaster(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_paste_blendsets'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -156,7 +156,7 @@ class paste_blendsets(bpy.types.Operator):
 						float(val)
 						kv_list.append( (key, val) )
 					except:
-						msg = bpy.app.translations.pgettext('shapekey.ParseFailed')
+						msg = bpy.app.translations.pgettext('butl.shapekey.ParseFailed')
 						self.report(type={'WARNING'}, message=msg % val)
 						continue
 					idx += 2
@@ -171,14 +171,14 @@ class paste_blendsets(bpy.types.Operator):
 			props['blendset:' + bs_name] = text
 			set_item_count += 1
 			kv_list.clear()
-		msg = bpy.app.translations.pgettext('shapekey.PasteBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg % set_item_count)
 		return {'FINISHED'}
 
-class copy_blendsets(bpy.types.Operator):
-	bl_idname = 'shapekey.copy_blendsets'
-	bl_label       = bpy.app.translations.pgettext('shapekey.CopyBlendsets')
-	bl_description = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Desc')
+class BlendsetsCopier(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_copy_blendsets'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -208,14 +208,14 @@ class copy_blendsets(bpy.types.Operator):
 				output_text += "\n"
 		
 		context.window_manager.clipboard = output_text
-		msg = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
-class clear_blendsets(bpy.types.Operator):
-	bl_idname = 'shapekey.clear_blendsets'
-	bl_label       = bpy.app.translations.pgettext('shapekey.ClearBlendsets')
-	bl_description = bpy.app.translations.pgettext('shapekey.ClearBlendsets.Desc')
+class BlendsetsClearer(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_clear_blendsets'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -235,14 +235,14 @@ class clear_blendsets(bpy.types.Operator):
 			if prop_key.startswith('blendset:'):
 				del props[prop_key]
 		
-		msg = bpy.app.translations.pgettext('shapekey.ClearBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
-class reflect_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.reflect_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.ReflectBlendset')
-	bl_description = bpy.app.translations.pgettext('shapekey.ReflectBlendset.Desc')
+class BlendsetReflector(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_reflect_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -280,19 +280,19 @@ class reflect_blendset(bpy.types.Operator):
 						if key != keyL and keyL in key_blocks:
 							key_blocks[keyL].value = numval/100
 						else:
-							msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
+							msg = bpy.app.translations.pgettext('butl.shapekey.KeyNotFound')
 							self.report(type={'WARNING'}, message=msg % key)
 				except:
 					continue
 		
-		msg = bpy.app.translations.pgettext('shapekey.ReflectBlendset.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset.Finished')
 		self.report(type={'INFO'}, message=msg % target_name)
 		return {'FINISHED'}
 
-class regist_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.regist_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.RegistBlendset')
-	bl_description = bpy.app.translations.pgettext('shapekey.RegistBlendset.Desc')
+class BlendsetRegister(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_regist_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -318,14 +318,14 @@ class regist_blendset(bpy.types.Operator):
 				output_text += key + " {0:g},".format(key_val)
 		ob.data['blendset:' + target_name] = output_text
 		
-		msg = bpy.app.translations.pgettext('shapekey.RegistBlendset.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset.Finished')
 		self.report(type={'INFO'}, message=msg % target_name)
 		return {'FINISHED'}
 
-class add_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.add_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.AddBlendset')
-	bl_description = bpy.app.translations.pgettext('shapekey.AddBlendset.Desc')
+class BlendsetAdder(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_add_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.AddBlendset')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.AddBlendset.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
@@ -351,14 +351,14 @@ class add_blendset(bpy.types.Operator):
 				output_text += key + " {0:g},".format(key_val)
 		ob.data['blendset:' + target_name] = output_text
 		
-		msg = bpy.app.translations.pgettext('shapekey.AddBlendset.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.AddBlendset.Finished')
 		self.report(type={'INFO'}, message=msg % target_name)
 		return {'FINISHED'}
 
-class del_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.del_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.DelBlendset')
-	bl_description = bpy.app.translations.pgettext('shapekey.DelBlendset.Desc')
+class BlendsetDeleter(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_del_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.DelBlendset')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.DelBlendset.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -375,17 +375,16 @@ class del_blendset(bpy.types.Operator):
 		target_name = bsl.target_name
 		
 		ob = context.active_object
-		
 		del ob.data['blendset:' + target_name]
 		
-		msg = bpy.app.translations.pgettext('shapekey.DelBlendset.Finished')
-		self.report(type={'INFO'}, message=msg % target_name)
+		msg = bpy.app.translations.pgettext('butl.shapekey.DelBlendset.Finished') % target_name
+		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
-class paste_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.paste_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.PasteBlendset')
-	bl_description = bpy.app.translations.pgettext('shapekey.PasteBlendset.Desc')
+class BlendsetPaster(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_paste_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -424,19 +423,19 @@ class paste_blendset(bpy.types.Operator):
 					if key != keyL and keyL in key_blocks:
 						key_blocks[keyL].value = numval/100
 					else:
-						msg = bpy.app.translations.pgettext('shapekey.KeyNotFound')
+						msg = bpy.app.translations.pgettext('butl.shapekey.KeyNotFound')
 						self.report(type={'WARNING'}, message=msg % key)
 			except:
 				key = val
 				continue
-		msg = bpy.app.translations.pgettext('shapekey.PasteBlendset.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 
-class copy_blendset(bpy.types.Operator):
-	bl_idname = 'shapekey.copy_blendset'
-	bl_label       = bpy.app.translations.pgettext('shapekey.CopyBlendsets')
-	bl_description = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Desc')
+class BlendsetCopier(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_copy_blendset'
+	bl_label       = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	@classmethod
@@ -460,14 +459,14 @@ class copy_blendset(bpy.types.Operator):
 				output_text += "\t" + key + "\n\t{0:g}\n".format(key_val)
 		
 		context.window_manager.clipboard = output_text
-		msg = bpy.app.translations.pgettext('shapekey.CopyBlendsets.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Finished')
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
-		
-class import_cm3d2_menu(bpy.types.Operator):
-	bl_idname = 'shapekey.import_cm3d2_menu'
-	bl_label = 'import menu file'#bpy.app.translations.pgettext('shapekey.ImportMenufile')
-	bl_description = bpy.app.translations.pgettext('shapekey.Menu.ImportfileDesc')
+
+class CM3D2MenuImporter(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_import_cm3d2_menu'
+	bl_label = 'import menu file' #bpy.app.translations.pgettext('shapekey.ImportMenufile')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ImportfileDesc')
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
@@ -482,10 +481,11 @@ class import_cm3d2_menu(bpy.types.Operator):
 		return False
 	
 	def invoke(self, context, event):
-		if common.prefs().menu_import_path:
-			self.filepath = common.prefs().menu_import_path
+		prefs = common.prefs()
+		if prefs.menu_import_path:
+			self.filepath = prefs.menu_import_path
 		else:
-			self.filepath = common.prefs().menu_default_path
+			self.filepath = prefs.menu_default_path
 		
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
@@ -499,12 +499,12 @@ class import_cm3d2_menu(bpy.types.Operator):
 		try:
 			file = open(self.filepath, 'rb')
 		except:
-			msg = bpy.app.translations.pgettext('shapekey.CannotOpenFile') % self.filepath
+			msg = bpy.app.translations.pgettext('butl.shapekey.CannotOpenFile') % self.filepath
 			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		if common.read_str(file) != 'CM3D2_MENU':
-			msg = bpy.app.translations.pgettext('shapekey.Menu.InvalidFile') % self.filepath
+			msg = bpy.app.translations.pgettext('butl.shapekey.Menu.InvalidFile') % self.filepath
 			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
@@ -565,27 +565,27 @@ class import_cm3d2_menu(bpy.types.Operator):
 				
 			props['menu_path'] = self.filepath
 		except:
-			msg = bpy.app.translations.pgettext('shapekey.Menu.FailedToParsefile')
+			msg = bpy.app.translations.pgettext('butl.shapekey.Menu.FailedToParsefile')
 			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		finally:
 			file.close()
 			
-		msg = bpy.app.translations.pgettext('shapekey.Menu.BlendsetsImport.Finished')
+		msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsImport.Finished')
 		self.report(type={'INFO'}, message=msg % set_item_count)
 		return {'FINISHED'}
 
-class export_cm3d2_menu(bpy.types.Operator):
-	bl_idname = 'shapekey.export_cm3d2_menu'
+class CM3D2MenuExporter(bpy.types.Operator):
+	bl_idname = 'shapekey.trzr_export_cm3d2_menu'
 	bl_label = "export to menu"
-	bl_description = bpy.app.translations.pgettext('shapekey.Menu.ExportfileDesc')
+	bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ExportfileDesc')
 	
 	filepath = bpy.props.StringProperty(subtype='FILE_PATH')
 	filename_ext = ".menu"
 	filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
 	
-	is_backup = bpy.props.BoolProperty(name="shapekey.Menu.Backup", default=True, description="shapekey.Menu.BackupDesc")
-	savefile  = bpy.props.StringProperty(name="shapekey.Menu.SaveFilename", default='', description="shapekey.Menu.SaveFilenameDesc")
+	is_backup = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
+	savefile  = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
 	
 	@classmethod
 	def poll(self, context):
@@ -615,7 +615,7 @@ class export_cm3d2_menu(bpy.types.Operator):
 	def draw(self, context):
 		self.layout.prop(self, 'is_backup', icon='FILE_BACKUP')
 		self.layout.prop(self, 'savefile', icon='NEW')
-		self.layout.label(text="shapekey.Menu.Overwrite")#, icon='LAMP')
+		self.layout.label(text="butl.shapekey.Menu.Overwrite")#, icon='LAMP')
 	
 	def execute(self, context):
 		common.prefs().menu_export_path = self.filepath
@@ -627,12 +627,12 @@ class export_cm3d2_menu(bpy.types.Operator):
 		try:
 			infile = open(self.filepath, 'rb')
 		except:
-			msg = bpy.app.translations.pgettext('shapekey.CannotOpenFile') % self.filepath
+			msg = bpy.app.translations.pgettext('butl.shapekey.CannotOpenFile') % self.filepath
 			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
 		if common.read_str(infile) != 'CM3D2_MENU':
-			msg = bpy.app.translations.pgettext('shapekey.Menu.InvalidFile') % self.filepath
+			msg = bpy.app.translations.pgettext('butl.shapekey.Menu.InvalidFile') % self.filepath
 			self.report(type={'ERROR'}, message=msg)
 			return {'CANCELLED'}
 		
@@ -691,7 +691,7 @@ class export_cm3d2_menu(bpy.types.Operator):
 				
 				props['menu_path'] = self.filepath
 		except:
-			msg = bpy.app.translations.pgettext('shapekey.Menu.FailedToParsefile.Export') % self.filepath
+			msg = bpy.app.translations.pgettext('butl.shapekey.Menu.FailedToParsefile.Export') % self.filepath
 			self.report(type={'ERROR'}, message=msg)
 			if tempfilepath:
 				os.remove(tempfilepath)
@@ -720,7 +720,7 @@ class export_cm3d2_menu(bpy.types.Operator):
 			os.remove(outfilepath)
 		os.rename(tempfilepath, outfilepath)
 		
-		msg = bpy.app.translations.pgettext('shapekey.Menu.BlendsetsExport.Finished') % self.filepath
+		msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsExport.Finished') % self.filepath
 		self.report(type={'INFO'}, message=msg)
 		return {'FINISHED'}
 	
