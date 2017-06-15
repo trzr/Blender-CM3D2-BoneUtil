@@ -23,6 +23,9 @@ if "bpy" in locals():
 	imp.reload(blendset_importer)
 	imp.reload(addon_updater)
 	imp.reload(vertex_group_tools)
+
+	imp.reload(selection_tool_mesh)
+	imp.reload(selection_tool_arm)
 else:
 	from . import translations
 	from . import common
@@ -32,6 +35,9 @@ else:
 	from . import blendset_importer
 	from . import addon_updater
 	from . import vertex_group_tools
+
+	from . import selection_tool_mesh
+	from . import selection_tool_arm
 
 import bpy, os.path, bpy.utils.previews
 
@@ -96,6 +102,8 @@ def register():
 	bpy.types.DATA_PT_context_mesh.append(blendset_importer.menu_func)
 	#bpy.types.DATA_PT_vertex_groups.append(vertex_group_tools.menu_func)
 	bpy.types.MESH_MT_vertex_group_specials.append(vertex_group_tools.menu_func_specials)
+	selection_tool_mesh.register()
+	selection_tool_arm.register()
 	
 	system = bpy.context.user_preferences.system
 	if not system.use_international_fonts:
@@ -120,6 +128,10 @@ def unregister():
 	
 	#bpy.types.DATA_PT_vertex_groups.remove(vertex_group_tools.menu_func)
 	bpy.types.MESH_MT_vertex_group_specials.remove(vertex_group_tools.menu_func_specials)
+	selection_tool_mesh.unregister()
+	selection_tool_arm.unregister()
+	
 	bpy.app.translations.unregister(__name__)
+
 if __name__ == "__main__":
 	register()
