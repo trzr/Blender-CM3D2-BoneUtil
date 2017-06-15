@@ -9,24 +9,12 @@ def menu_func(self, context):
 	if ob.parent is None or ob.parent.type != 'ARMATURE': return
 	if len(ob.parent.data.bones) == 0: return
 	# MESHの場合は、親がARMATUREであり、ボーンがあることが条件
-	target_props = ob
-	
-	bb_name = None
-	if 'BaseBone' in target_props:
-		bb_name = target_props['BaseBone']
-	if bb_name is None: return
 	
 	menu_func_common(self, context)
 
 def menu_func_arm(self, context):
 	ob = context.active_object
 	if not ob or ob.type != 'ARMATURE': return
-	target_props = ob.data
-	
-	bb_name = None
-	if 'BaseBone' in target_props:
-		bb_name = target_props['BaseBone']
-	if bb_name is None: return
 	
 	menu_func_common(self, context)
 
@@ -58,22 +46,25 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):
 			if ob.type == 'ARMATURE':
 				return 'BaseBone' in ob.data
 			elif ob.type == 'MESH':
-				if ob.parent and ob.parent.type == 'ARMATURE':
-					return 'BaseBone' in ob
-
+				return 'BaseBone' in ob
+		
 		return False
 
 	def invoke(self, context, event):
 		ob = context.active_object
+		self.bb_name = ''
+		self.target_bones = None
 		if ob.type == 'ARMATURE':
 			self.bb_name = ob.data['BaseBone']
 			self.target_props = ob.data
-			self.target_data = ob.data
+			self.target_bones = ob.data.bones
 			self.is_mesh = False
 		elif ob.type == 'MESH':
 			self.bb_name = ob['BaseBone']
 			self.target_props = ob
-			self.target_data = ob.parent.data
+			# 親がARMATUREでない場合も動作
+			if ob.parent and ob.parent.type == 'ARMATURE':
+				self.target_bones = ob.parent.data.bones
 			self.is_mesh = True
 			
 		self.bb_name_old = self.bb_name
@@ -83,19 +74,12 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):
 		self.layout.prop(self, 'bb_name', icon='SORTALPHA')
 		#self.layout.prop(self, 'target_type', icon='BONE_DATA')
 		
-		target_bones = self.target_data.bones
-		if target_bones and self.bb_name_old in target_bones:
+		if self.target_bones and self.bb_name_old in self.target_bones:
 			row = self.layout.row(align=True)
 			row.prop(self, 'change_bonename', icon='NONE')
 
-	def execute(self, context):
-		old_bb_name = self.target_props['BaseBone']
-		if self.bb_name == old_bb_name:
-			self.report(type={'INFO'}, message="BaseBone is not changed.")
-			return {'CANCELLED'}
-		
-		target_name = None
-		for item in self.target_props.items():
+	def rename_prop(self, props, bb_name):
+		for item in props.items():
 			prop_name = item[0]
 			if prop_name.startswith('BoneData:'):
 				try:
@@ -103,24 +87,33 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):
 					bdlist = bonedata_txt.split(',', 1)
 					if len(bdlist) < 1 : continue
 					
-					if old_bb_name == bdlist[0]:
-						bdlist[0] = self.bb_name
-						self.target_props[prop_name] = bdlist[0] + ',' + bdlist[1]
-						self.target_props['BaseBone'] = self.bb_name
-						target_name = prop_name
+					if self.bb_name_old == bdlist[0]:
+						bdlist[0] = bb_name
+						props[prop_name] = bdlist[0] + ',' + bdlist[1]
+						props['BaseBone'] = bb_name
+						return prop_name
 						break
 				except:
 					pass
+		return None
+	
+	def execute(self, context):
+		ob = context.active_object
+		self.bb_name_old = self.target_props['BaseBone']
+		if self.bb_name == self.bb_name_old:
+			self.report(type={'INFO'}, message="BaseBone was not changed.")
+			return {'CANCELLED'}
+		
+		target_name = self.rename_prop(self.target_props, self.bb_name)
 		
 		if self.change_bonename:
-			ob = context.active_object
-			if ob.type == 'MESH':
-				target_bones = context.active_object.parent.data.bones
-			elif ob.type == 'ARMATURE':
-				target_bones = context.active_object.data.bones
-			
-			if old_bb_name in target_bones:
-				target_bones[old_bb_name].name = self.bb_name
+			if self.bb_name_old in self.target_bones:
+				self.target_bones[self.bb_name_old].name = self.bb_name
+				if self.is_mesh:
+					# Armatureのカスタムプロパティもあわせて変更
+					prop_name = self.rename_prop(ob.parent.data, self.bb_name)
+					if prop_name:
+						target_name += "," + prop_name
 		
 		if target_name:
 			msg = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBoneCompleted')
