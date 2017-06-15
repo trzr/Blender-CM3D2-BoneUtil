@@ -22,6 +22,7 @@ if "bpy" in locals():
 	
 	imp.reload(blendset_importer)
 	imp.reload(addon_updater)
+	imp.reload(vertex_group_tools)
 else:
 	from . import translations
 	from . import common
@@ -30,6 +31,7 @@ else:
 	
 	from . import blendset_importer
 	from . import addon_updater
+	from . import vertex_group_tools
 
 import bpy, os.path, bpy.utils.previews
 
@@ -40,6 +42,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bonetype_renamer = bpy.props.BoolProperty(name="butl.ChangeBoneTypeFeature", description="butl.ChangeBoneTypeFDesc", default=False )
 	bsimp = bpy.props.BoolProperty(name="butl.shapekey.BsImporterFeature", description="butl.shapekey.BsImporterFDesc", default=True )
 	
+	vgfeature = bpy.props.BoolProperty(name="頂点グループ関連機能", description="頂点グループ関連の機能を追加します", default=False )
 	backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt", description="butl.shapekey.Menu.BackupExtDesc", default='bak')
 	menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH', description="butl.shapekey.Menu.TargetDirDesc")
 	menu_import_path  = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH', description="butl.shapekey.Menu.DefaultPath.ImportDesc")
@@ -58,6 +61,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		split = row.split(percentage=0.3, align=True)
 		split.prop(self, 'bonetype_renamer', icon='NONE')
 		split.prop(self, 'bsimp', icon='NONE')
+		split.prop(self, 'vgfeature', icon='NONE')
 		
 		box = layout.box()
 		box.prop(self, 'backup_ext', icon='FILE_BACKUP')
@@ -90,6 +94,8 @@ def register():
 	
 	blendset_importer.register()
 	bpy.types.DATA_PT_context_mesh.append(blendset_importer.menu_func)
+	#bpy.types.DATA_PT_vertex_groups.append(vertex_group_tools.menu_func)
+	bpy.types.MESH_MT_vertex_group_specials.append(vertex_group_tools.menu_func_specials)
 	
 	system = bpy.context.user_preferences.system
 	if not system.use_international_fonts:
@@ -112,6 +118,8 @@ def unregister():
 	blendset_importer.unregister()
 	bpy.types.DATA_PT_context_mesh.remove(blendset_importer.menu_func)
 	
+	#bpy.types.DATA_PT_vertex_groups.remove(vertex_group_tools.menu_func)
+	bpy.types.MESH_MT_vertex_group_specials.remove(vertex_group_tools.menu_func_specials)
 	bpy.app.translations.unregister(__name__)
 if __name__ == "__main__":
 	register()
