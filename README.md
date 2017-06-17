@@ -34,13 +34,14 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 
 ## ■ 提供機能
 
+使い方の詳細は、[wiki][] を参照してください。  
+一部は以下のリンクから参照できます。  
+
 |機能| 概要|
 |:---|:----|
 | **[BoneData取り込み機能][BoneImporter]** | Blender上のボーンからBoneDataを取込む機能|
 | **[揺れボーンタイプ 一括変更機能][ChangeBoneType]** （オプション） | 揺れボーンの型を一括で変更する機能|
 | **[シェイプキー値反映機能][BlendsetImporter]** | blendsetを元に、シェイプキーの値を一括で変更する機能|
-
-使い方・詳細は各機能のリンク先にあるwikiを参照してください。
 
 
 ## ■ 免責
@@ -48,16 +49,17 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
   各自の責任において使用してください。
 
 ## ■ 謝辞
-  ボーンの計算式の大部分は、[夜勤D][]さんの作成されたスクリプトをベースにさせていただいております。   
-  また、アドオン作成は、[CM3D2 Converter][]を参考にさせていただきました。  
-  感謝！
-
+  ボーン計算式の大部分は、[夜勤D][]さんの作成されたスクリプトをベースとしております。  
+  また、Blenderアドオン作成については [CM3D2 Converter][]を参考にさせてもらっています。  
+  これ以外にも、twitterで多数助言をいただいております。  
+  支援くださった皆様に感謝  
 
 
 [CM3D2 Converter]:https://github.com/CM3Duser/Blender-CM3D2-Converter
 [blender278]:http://download.blender.org/release/Blender2.78/
 [master_zip]:https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip
 [Releases]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
+[wiki]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki
 [BoneImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Import%20To%20BoneData
 [ChangeBoneType]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Change%20BoneType
 [BlendsetImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BlendsetImporter
