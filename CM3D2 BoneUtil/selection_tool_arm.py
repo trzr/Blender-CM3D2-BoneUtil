@@ -11,7 +11,9 @@ class ARM_OP_select_name(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context):
 		ob = context.active_object
-		return ob and ob.type == 'ARMATURE' # and (context.mode == 'POSE' or context.mode == 'EDIT_ARMATURE'))
+		if ob and ob.type == 'ARMATURE': # and (context.mode == 'POSE' or context.mode == 'EDIT_ARMATURE'))
+			return len(context.scene.TrzrSelUtilKey) > 0
+		return False
 	
 	def execute(self, context):
 		ob = context.active_object
