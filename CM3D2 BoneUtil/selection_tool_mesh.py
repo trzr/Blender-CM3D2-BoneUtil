@@ -186,7 +186,7 @@ class MESH_OP_select_symmetry(bpy.types.Operator):
 			negative_co(co)
 			
 			near_co, near_index, near_dist = kd.find(co)
-			if near_dist < margin:
+			if near_dist <= margin:
 				v = edit_me.verts[near_index]
 				v.select = is_select
 				if not is_select: changed_vertices.append(v)
