@@ -30,7 +30,7 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 　「Tools: CM3D2 BoneUtil」をオンにすれば(一時的に)有効になります。  
 　次回起動時からも有効にしたい場合は「ユーザー設定の保存」をクリックして下さい。  
 
-![UserSave](http://i.imgur.com/2SMHgOQ.png)
+![UserSave](https://raw.githubusercontent.com/wiki/trzr/Blender-CM3D2-BoneUtil/images/repos_config.png)
 
 ## ■ 提供機能
 
@@ -39,9 +39,9 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 
 |機能| 概要|
 |:---|:----|
-| **[BoneData取り込み機能][BoneImporter]** | Blender上のボーンからBoneDataを取込む機能|
-| **[揺れボーンタイプ 一括変更機能][ChangeBoneType]** （オプション） | 揺れボーンの型を一括で変更する機能|
-| **[シェイプキー値反映機能][BlendsetImporter]** | blendsetを元に、シェイプキーの値を一括で変更する機能|
+| **[BoneData取り込み機能][BoneImport]** | Blender上のボーンからBoneDataを取込む機能|
+| **[揺れボーンタイプ 一括変更機能][BoneTypeRename]** （オプション） | 揺れボーンの型を一括で変更する機能|
+| **[シェイプキー値反映機能][BlendsetEdit]** | blendsetを元に、シェイプキーの値を一括で変更する機能|
 
 
 ## ■ 免責
@@ -60,7 +60,7 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 [master_zip]:https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip
 [Releases]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
 [wiki]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki
-[BoneImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Import%20To%20BoneData
-[ChangeBoneType]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/Change%20BoneType
-[BlendsetImporter]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BlendsetImporter
+[BoneImport]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BoneDataImport
+[BoneTypeRename]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BoneTypeRename
+[BlendsetEdit]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki/BlendsetEdit
 [夜勤D]:https://github.com/yknD-CM3D2
