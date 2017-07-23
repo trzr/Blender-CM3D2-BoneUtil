@@ -141,7 +141,7 @@ class VersionHistory:
         return False
 
 
-class INFO_MT_CM3D2_BoneUtil_history(bpy.types.Menu):  # type: ignore
+class CM3D2BoneUtilHistory(bpy.types.Menu):  # type: ignore
     """更新履歴メニュー."""
 
     bl_idname = 'INFO_MT_CM3D2_BoneUtil_history'

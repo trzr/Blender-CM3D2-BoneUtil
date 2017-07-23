@@ -4,7 +4,7 @@ import bpy  # type: ignore
 from typing import Dict, Set, List, Tuple, Optional, Any, Callable
 
 
-class ARM_OP_select_name(bpy.types.Operator):  # type: ignore
+class ArmSelectNameOprator(bpy.types.Operator):  # type: ignore
     bl_idname = 'armature.trzr_select_name'
     bl_label = "Select bones"
     bl_description = bpy.app.translations.pgettext('selutl.SelBoneByNameDesc')
@@ -38,7 +38,7 @@ class ARM_OP_select_name(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class ARM_OP_select(bpy.types.Operator):  # type: ignore
+class ArmSelectOperator(bpy.types.Operator):  # type: ignore
     bl_idname = 'armature.trzr_select'
     bl_label = "Select bones"
     bl_description = bpy.app.translations.pgettext('selutl.SelBoneDesc')
@@ -97,17 +97,17 @@ class ARM_OP_select(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class VIEW3D_PT_tools_selectarm(bpy.types.Panel):  # type: ignore
-    bl_space_type  = 'VIEW_3D'
+class ArmSelectPanel(bpy.types.Panel):  # type: ignore
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = 'Tools'
-    bl_context  = "armature_edit"  # "posemode"
+    bl_context = "armature_edit"  # "posemode"
     bl_label = "SelectUtil"
 
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
         ob = context.active_object
-        return (ob and ob.type == 'ARMATURE' and (context.mode == 'POSE' or context.mode == 'EDIT_ARMATURE'))
+        return ob and ob.type == 'ARMATURE' and (context.mode == 'POSE' or context.mode == 'EDIT_ARMATURE')
 
     def draw(self, context):  # type: (bpy.types.Context) -> None
         scn = context.scene
@@ -126,27 +126,27 @@ class VIEW3D_PT_tools_selectarm(bpy.types.Panel):  # type: ignore
 
         split = row.split(0.18, align=True)
         split.label('Select')
-        split.operator(ARM_OP_select.bl_idname, icon='NONE', text='< B' ).target = 'lt'
-        split.operator(ARM_OP_select.bl_idname, icon='NONE', text='<= B').target = 'le'
-        split.operator(ARM_OP_select.bl_idname, icon='NONE', text='== B').target = 'eq'
-        split.operator(ARM_OP_select.bl_idname, icon='NONE', text='B <=').target = 'ge'
-        split.operator(ARM_OP_select.bl_idname, icon='NONE', text='B <' ).target = 'gt'
+        split.operator(ArmSelectOperator.bl_idname, icon='NONE', text='< B').target = 'lt'
+        split.operator(ArmSelectOperator.bl_idname, icon='NONE', text='<= B').target = 'le'
+        split.operator(ArmSelectOperator.bl_idname, icon='NONE', text='== B').target = 'eq'
+        split.operator(ArmSelectOperator.bl_idname, icon='NONE', text='B <=').target = 'ge'
+        split.operator(ArmSelectOperator.bl_idname, icon='NONE', text='B <').target = 'gt'
 
         row = layout.row()
         split = row.split(0.75)
         split.prop(scn, 'TrzrSelUtilBase', icon='NONE')
         split.alignment = 'RIGHT'
-        split.operator(ARM_OP_select_set_base.bl_idname, text='0')
+        split.operator(ArmSelectBaseClearer.bl_idname, text='0')
         row = layout.row()
         split = row.split(0.75)
         split.prop(scn, 'TrzrSelUtilMargin', icon='NONE')
         # split.operator('armature.select_util_set_margin', text='0').value=0
-        split.operator(ARM_OP_select_set_margin.bl_idname, text='0.0001').value = 0.0001
+        split.operator(ArmSelectMarginSetter.bl_idname, text='0.0001').value = 0.0001
 
         row = layout.row()
         split = row.split(0.75)
         split.prop(scn, 'TrzrSelUtilKey', icon='NONE')
-        split.operator(ARM_OP_select_name.bl_idname, icon='NONE', text='Select' )
+        split.operator(ArmSelectNameOprator.bl_idname, icon='NONE', text='Select')
         row = layout.row()
         row.alignment = 'RIGHT'
         row.prop(scn, 'TrzrSelUtilIgnoreCase', icon='NONE')
@@ -154,7 +154,7 @@ class VIEW3D_PT_tools_selectarm(bpy.types.Panel):  # type: ignore
         # split.operator('armature.select_util_set_base', text='0')
 
 
-class ARM_OP_select_set_base(bpy.types.Operator):  # type: ignore
+class ArmSelectBaseClearer(bpy.types.Operator):  # type: ignore
     bl_idname = 'armature.trzr_select_base_clear'
     bl_label = "clear base"
     bl_description = bpy.app.translations.pgettext('selutl.ClearBaseDesc')
@@ -170,7 +170,7 @@ class ARM_OP_select_set_base(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class ARM_OP_select_set_margin(bpy.types.Operator):  # type: ignore
+class ArmSelectMarginSetter(bpy.types.Operator):  # type: ignore
     bl_idname = 'armature.trzr_select_set_margin'
     bl_label = "set default margin"
     bl_description = bpy.app.translations.pgettext('selutl.SetDefaultMarginDesc')

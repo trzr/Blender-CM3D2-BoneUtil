@@ -36,7 +36,6 @@ if "bpy" in locals():
     imp.reload(selection_tool_arm)
 else:
     from . import translations
-    from . import common
     from . import bonedata_importer
     from . import bonetype_renamer
 
@@ -50,7 +49,6 @@ else:
     from . import selection_tool_arm
 
 import bpy
-import os.path
 import bpy.utils.previews
 
 
@@ -58,21 +56,24 @@ import bpy.utils.previews
 class AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    bonetype_renamer = bpy.props.BoolProperty(name="butl.ChangeBoneTypeFeature", description="butl.ChangeBoneTypeFDesc", default=False )
-    bsimp = bpy.props.BoolProperty(name="butl.shapekey.BsImporterFeature", description="butl.shapekey.BsImporterFDesc", default=True )
+    bonetype_renamer = bpy.props.BoolProperty(name="butl.ChangeBoneTypeFeature", description="butl.ChangeBoneTypeFDesc", default=False)
+    bsimp = bpy.props.BoolProperty(name="butl.shapekey.BsImporterFeature", description="butl.shapekey.BsImporterFDesc", default=True)
 
-    vgfeature = bpy.props.BoolProperty(name="頂点グループ関連機能", description="頂点グループ関連の機能を追加します", default=False )
+    vgfeature = bpy.props.BoolProperty(name="頂点グループ関連機能", description="頂点グループ関連の機能を追加します", default=False)
 
     backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt", description="butl.shapekey.Menu.BackupExtDesc", default='bak')
-    menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH', description="butl.shapekey.Menu.TargetDirDesc")
-    menu_import_path  = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH', description="butl.shapekey.Menu.DefaultPath.ImportDesc")
-    menu_export_path  = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH', description="butl.shapekey.Menu.DefaultPath.ExportDesc")
+    menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
+                                                 description="butl.shapekey.Menu.TargetDirDesc")
+    menu_import_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
+                                                description="butl.shapekey.Menu.DefaultPath.ImportDesc")
+    menu_export_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH',
+                                                description="butl.shapekey.Menu.DefaultPath.ExportDesc")
 
     update_history = addon_updater.VersionHistory()
-    update_history.now_ver = [ v for v in bl_info['version'] ]
-    version = '.'.join( [ str(v) for v in bl_info['version'] ] )
+    update_history.now_ver = [v for v in bl_info['version']]
+    version = '.'.join([str(v) for v in bl_info['version']])
 
-    def draw(self, context):
+    def draw(self, context):  # type: (bpy.context) -> None
         layout = self.layout
         layout.label(text="butl.PushSaveButton", icon='QUESTION')
         box = layout.box()
@@ -112,7 +113,6 @@ def register():  # type: () -> None
     bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
     bpy.types.DATA_PT_context_arm.append(bonetype_renamer.menu_func_arm)
 
-
     blendset_importer.register()
     bpy.types.DATA_PT_context_mesh.append(blendset_importer.menu_func)
     # bpy.types.DATA_PT_shape_keys.append(blendset_importer.menu_func)
@@ -146,7 +146,6 @@ def unregister():  # type: () -> None
     bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
     bpy.types.DATA_PT_context_arm.remove(bonetype_renamer.menu_func_arm)
     bonetype_renamer.unregister()
-
 
     blendset_importer.unregister()
     bpy.types.DATA_PT_context_mesh.remove(blendset_importer.menu_func)

@@ -53,6 +53,8 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
     def __init__(self):  # type: () -> None
         self.bb_name_old = None  # type: Optional[str]
         self.target_props = None  # type: Any
+        self.target_bones = None
+        self.is_mesh = False
 
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
@@ -156,22 +158,22 @@ class BoneData1(object):  # type: ignore
 
 class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
     bl_idname = 'object.trzr_import_cm3d2_bonedata'
-    bl_label       = 'Import BoneData'
+    bl_label = 'Import BoneData'
     bl_description = bpy.app.translations.pgettext('butl.bdimport.ImportBoneDataDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
-    bb_name       = bpy.props.StringProperty(name="butl.BaseBoneName")
+    bb_name = bpy.props.StringProperty(name="butl.BaseBoneName")
     target_items = [
         ('All', 'butl.EnumAll', "", '', 0),
         ('Selected', 'butl.EnumSelected', "", '', 1),
         ('Descendant', 'butl.EnumDescendant', "", '', 2),
     ]
-    target_type   = bpy.props.EnumProperty(name="Target", items=target_items, default='Descendant')
-    scale         = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="butl.ScaleDesc")
-    import_bd     = bpy.props.BoolProperty(name="BoneData", default=True)
-    import_lbd    = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-    sync_bd       = bpy.props.BoolProperty(name="butl.bdimport.RemoveBoneDataNonExistent", default=False)
-    exclude_ikbd  = bpy.props.BoolProperty(name="butl.bdimport.ExcludeIKBoneDataForRemove", default=True)
+    target_type = bpy.props.EnumProperty(name="Target", items=target_items, default='Descendant')
+    scale = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="butl.ScaleDesc")
+    import_bd = bpy.props.BoolProperty(name="BoneData", default=True)
+    import_lbd = bpy.props.BoolProperty(name="LocalBoneData", default=True)
+    sync_bd = bpy.props.BoolProperty(name="butl.bdimport.RemoveBoneDataNonExistent", default=False)
+    exclude_ikbd = bpy.props.BoolProperty(name="butl.bdimport.ExcludeIKBoneDataForRemove", default=True)
     vg_opr = bpy.props.EnumProperty(
         name="VertexGroup",
         items=[
@@ -188,7 +190,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         ], default='normal')
 
     def __init__(self):  # type: () -> None
-        self.is_old        = False
+        self.is_old = False
 
         self.bonedata_idx = 0
         self.bd_dic = {}   # type: Dict
@@ -206,6 +208,9 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.count_bd_update = 0
         self.count_lbd_add = 0
         self.count_lbd_update = 0
+
+        self.target_data = None
+        self.is_mesh = False
 
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
@@ -347,7 +352,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 if self.import_lbd:
                     for lbd1 in self.lbd_dic.values():
                         if not lbd1[3] and lbd1[2] not in self.bone_names:
-                            del self.target_props[ lbd1[1] ]
+                            del self.target_props[lbd1[1]]
                             count_lbd_del += 1
 
                 # 歯抜けのBoneData/LocalBoneDataを修正
@@ -405,7 +410,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
                     bone_name = bdlist[0]
                     node = BoneData1(bone_name, bdlist[1], bdlist[2], prop_name)
-                    node.co  = bdlist[3]
+                    node.co = bdlist[3]
                     node.rot = bdlist[4]
                     self.bd_dic[bone_name] = node
                     if bone_name not in self.bone_names:
@@ -657,11 +662,11 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 qlb = bone_d.matrix_local.to_quaternion()
                 if self.is_old:
                     qlb.w, qlb.x, qlb.y, qlb.z = qlb.w, qlb.y, -qlb.z, -qlb.x
-                    rotate_first = mathutils.Matrix( [[0, 0, -1], [0, 1, 0], [1, 0, 0]] )  # mathutils.Euler((0, math.radians(-90), 0), 'XYZ')
+                    rotate_first = mathutils.Matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])  # mathutils.Euler((0, math.radians(-90), 0), 'XYZ')
                 else:
                     qlb.w, qlb.x, qlb.y, qlb.z = qlb.w, qlb.y, qlb.x, -qlb.z
                     # rotate_first = mathutils.Euler((math.radians(-90), math.radians(-90), 0), 'XYZ')
-                    rotate_first = mathutils.Matrix( [[0, 1, 0], [0, 0, 1], [1, 0, 0]] )
+                    rotate_first = mathutils.Matrix([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
 
                 mrbase = mathutils.Quaternion( (float(self.rotor[0]), float(self.rotor[1]), float(self.rotor[2]), float(self.rotor[3])) ).to_matrix()
                 mt = mathutils.Vector([bone_d.head_local.x, -bone_d.head_local.z, bone_d.head_local.y]) / self.scale * mrbase

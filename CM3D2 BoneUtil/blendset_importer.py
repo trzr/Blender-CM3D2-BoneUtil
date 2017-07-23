@@ -72,7 +72,7 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
         col1.template_list("BlendsetList", "", bsl, "blendset_items", bsl, "item_idx", rows=2)
 
         if bsl.item_idx != bsl.prev_idx:
-            if bsl.item_idx >= 0 and bsl.item_idx < bs_count:
+            if 0 <= bsl.item_idx < bs_count:
                 bsl.target_name = bsl.blendset_items[bsl.item_idx].name
             else:
                 bsl.target_name = ""
@@ -110,7 +110,7 @@ def refresh_list(self, context, bs_list, target_props):  # type: (Any, bpy.types
 
 class BlendsetsPaster(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_paste_blendsets'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -183,7 +183,7 @@ class BlendsetsPaster(bpy.types.Operator):  # type: ignore
 
 class BlendsetsCopier(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_copy_blendsets'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -221,7 +221,7 @@ class BlendsetsCopier(bpy.types.Operator):  # type: ignore
 
 class BlendsetsClearer(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_clear_blendsets'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -249,7 +249,7 @@ class BlendsetsClearer(bpy.types.Operator):  # type: ignore
 
 class BlendsetReflector(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_reflect_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -284,9 +284,9 @@ class BlendsetReflector(bpy.types.Operator):  # type: ignore
                     if key in key_blocks:
                         key_blocks[key].value = numval / 100
                     else:
-                        keyL = key.lower()
-                        if key != keyL and keyL in key_blocks:
-                            key_blocks[keyL].value = numval / 100
+                        key_l = key.lower()
+                        if key != key_l and key_l in key_blocks:
+                            key_blocks[key_l].value = numval / 100
                         else:
                             msg = bpy.app.translations.pgettext('butl.shapekey.KeyNotFound')
                             self.report(type={'WARNING'}, message=msg % key)
@@ -300,7 +300,7 @@ class BlendsetReflector(bpy.types.Operator):  # type: ignore
 
 class BlendsetRegister(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_regist_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -334,7 +334,7 @@ class BlendsetRegister(bpy.types.Operator):  # type: ignore
 
 class BlendsetAdder(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_add_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.AddBlendset')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.AddBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.AddBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -368,7 +368,7 @@ class BlendsetAdder(bpy.types.Operator):  # type: ignore
 
 class BlendsetDeleter(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_del_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.DelBlendset')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.DelBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.DelBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -395,7 +395,7 @@ class BlendsetDeleter(bpy.types.Operator):  # type: ignore
 
 class BlendsetPaster(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_paste_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -435,9 +435,9 @@ class BlendsetPaster(bpy.types.Operator):  # type: ignore
                 if key in key_blocks:
                     key_blocks[key].value = numval / 100
                 else:
-                    keyL = key.lower()
-                    if key != keyL and keyL in key_blocks:
-                        key_blocks[keyL].value = numval / 100
+                    key_l = key.lower()
+                    if key != key_l and key_l in key_blocks:
+                        key_blocks[key_l].value = numval / 100
                     else:
                         msg = bpy.app.translations.pgettext('butl.shapekey.KeyNotFound')
                         self.report(type={'WARNING'}, message=msg % key)
@@ -452,7 +452,7 @@ class BlendsetPaster(bpy.types.Operator):  # type: ignore
 
 class BlendsetCopier(bpy.types.Operator):  # type: ignore
     bl_idname = 'shapekey.trzr_copy_blendset'
-    bl_label       = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
+    bl_label = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -558,7 +558,7 @@ class CM3D2MenuImporter(bpy.types.Operator):  # type: ignore
             length = struct.unpack('<B', file.read(1))[0]
             # include_blendset = False
             # idx = 0
-            while (length > 0):
+            while length > 0:
                 vals.clear()
                 key = common.read_str(file)
 
@@ -613,7 +613,7 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
     filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
 
     is_backup = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
-    savefile  = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
+    savefile = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
 
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
@@ -667,8 +667,9 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
 
         props = ob.data
         try:
+            temp_filepath = None  # type: Optional[str]
             with tempfile.NamedTemporaryFile(mode='w+b', suffix='temp', prefix=filename, dir=outdir, delete=False) as outfile:
-                tempfilepath = outfile.name
+                temp_filepath = outfile.name
                 menu_ver = struct.unpack('<i', infile.read(4))[0]
                 menu_path = common.read_str(infile)
                 menu_name = common.read_str(infile)
@@ -687,11 +688,11 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
 
                 length = struct.unpack('<B', infile.read(1))[0]
                 exported_blendset = False
-                while (length > 0):
+                while length > 0:
                     key = common.read_str(infile)
                     if key == 'blendset':
                         for i in range(length - 1):
-                            val = common.read_str(infile)
+                            common.read_str(infile)  # read skip
 
                         if not exported_blendset:
                             exported_blendset = True
@@ -722,8 +723,8 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
         except:
             msg = bpy.app.translations.pgettext('butl.shapekey.Menu.FailedToParsefile.Export') % self.filepath
             self.report(type={'ERROR'}, message=msg)
-            if tempfilepath:
-                os.remove(tempfilepath)
+            if temp_filepath:
+                os.remove(temp_filepath)
             raise
             # return {'CANCELLED'}
         finally:
@@ -748,7 +749,7 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
                 os.rename(outfilepath, bkfile)
         if os.path.exists(outfilepath):
             os.remove(outfilepath)
-        os.rename(tempfilepath, outfilepath)
+        os.rename(temp_filepath, outfilepath)
 
         msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsExport.Finished') % self.filepath
         self.report(type={'INFO'}, message=msg)
@@ -757,14 +758,14 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
     def _export_blendset(self, ba, props):  # type: (bytearray, Iterator[Tuple[str, str]]) -> None
         for propkey, propval in props:
             if propkey.startswith('blendset:'):
-                pvalItems = propval.split(',')
-                itemLength = len(pvalItems) * 2  # no +2 (comma end)
+                pval_items = propval.split(',')
+                item_length = len(pval_items) * 2  # no +2 (comma end)
 
-                ba.append(itemLength)  # bytearray( struct.pack('<i', itemLength) )
+                ba.append(item_length)  # bytearray( struct.pack('<i', item_length) )
                 common.append_str(ba, 'blendset')
                 common.append_str(ba, propkey[9:])
 
-                for val in pvalItems:
+                for val in pval_items:
                     if len(val) <= 2:
                         continue
                     entry = val.split(' ')
@@ -780,20 +781,20 @@ class BlendsetItem(bpy.types.PropertyGroup):  # type: ignore
 
 class BlendsetList(bpy.types.UIList):  # type: ignore
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):  # type: ignore
-        layout.label(text=item.name, translate=False, icon='NONE' )
+        layout.label(text=item.name, translate=False, icon='NONE')
 
 
 class Blendsets(bpy.types.PropertyGroup):  # type: ignore
     blendset_items = bpy.props.CollectionProperty(type=BlendsetItem)
-    item_idx       = bpy.props.IntProperty()
-    prev_idx       = bpy.props.IntProperty()
-    target_name    = bpy.props.StringProperty()
-    display_list   = bpy.props.BoolProperty(
+    item_idx = bpy.props.IntProperty()
+    prev_idx = bpy.props.IntProperty()
+    target_name = bpy.props.StringProperty()
+    display_list = bpy.props.BoolProperty(
         name="Blendset List",
         description="Display Blendset List",
         default=False)
 
-    display_box   = bpy.props.BoolProperty(
+    display_box = bpy.props.BoolProperty(
         name="display_box",
         description="",
         default=False)

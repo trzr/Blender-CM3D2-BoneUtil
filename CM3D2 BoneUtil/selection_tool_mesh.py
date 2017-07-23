@@ -29,7 +29,7 @@ def update_select(edit_me, changed_vertices):  # type: (Any, List) -> None
         edit_me.verts[idx].select = True
 
 
-class MESH_OP_select(bpy.types.Operator):  # type: ignore
+class MeshSelectOperator(bpy.types.Operator):  # type: ignore
     bl_idname = 'mesh.trzr_select'
     bl_label = "SelectUtil"
     bl_description = bpy.app.translations.pgettext('selutl.SelPointDesc')
@@ -49,9 +49,9 @@ class MESH_OP_select(bpy.types.Operator):  # type: ignore
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
         ob = context.active_object
-        return (ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
+        return ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH'
 
-    def get_item(self, v_neighbors, v):  # type: ignore
+    def _get_item(self, v_neighbors, v):  # type: ignore
         item = v_neighbors[v.index]
         if item is None:
             item = []
@@ -113,7 +113,7 @@ class MESH_OP_select(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class MESH_OP_select_symmetry(bpy.types.Operator):  # type: ignore
+class MeshSelectSymOperator(bpy.types.Operator):  # type: ignore
     bl_idname = 'mesh.trzr_select_symmetry'
     bl_label = "SelectUtil"
     bl_description = bpy.app.translations.pgettext('selutl.SelSymmetricPointDesc')
@@ -129,9 +129,9 @@ class MESH_OP_select_symmetry(bpy.types.Operator):  # type: ignore
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
         ob = context.active_object
-        return (ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
+        return ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH'
 
-    def get_item(self, v_neighbors, v):  # type: ignore
+    def _get_item(self, v_neighbors, v):  # type: ignore
         item = v_neighbors[v.index]
         if item is None:
             item = []
@@ -177,10 +177,10 @@ class MESH_OP_select_symmetry(bpy.types.Operator):  # type: ignore
         selected = []
         target_verts = []
         if self.target == 'lt':
-            infunc  = lt
+            infunc = lt
             outfunc = gt
         elif self.target == 'gt':
-            infunc  = gt
+            infunc = gt
             outfunc = lt
 
         for v in edit_me.verts:
@@ -201,13 +201,9 @@ class MESH_OP_select_symmetry(bpy.types.Operator):  # type: ignore
 
         for vindex in selected:
             co = me.vertices[vindex].co.copy()
-            print(co)
             negative_co(co)  # type: ignore
 
             near_co, near_index, near_dist = kd.find(co)
-            print(near_co)
-            print(near_index)
-            print(near_dist)
             if near_dist <= margin:
                 v = edit_me.verts[near_index]
                 v.select = is_select
@@ -232,7 +228,7 @@ class MESH_OP_select_symmetry(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class VIEW3D_PT_tools_selectutil(bpy.types.Panel):  # type: ignore
+class MeshSelectPanel(bpy.types.Panel):  # type: ignore
     bl_space_type  = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = 'Tools'
@@ -256,32 +252,32 @@ class VIEW3D_PT_tools_selectutil(bpy.types.Panel):  # type: ignore
 
         split = row.split(0.18, align=True)
         split.label('Select')
-        split.operator(MESH_OP_select.bl_idname, icon='NONE', text='< B' ).target = 'lt'
-        split.operator(MESH_OP_select.bl_idname, icon='NONE', text='<= B').target = 'le'
-        split.operator(MESH_OP_select.bl_idname, icon='NONE', text='== B').target = 'eq'
-        split.operator(MESH_OP_select.bl_idname, icon='NONE', text='B <=').target = 'ge'
-        split.operator(MESH_OP_select.bl_idname, icon='NONE', text='B <' ).target = 'gt'
+        split.operator(MeshSelectOperator.bl_idname, icon='NONE', text='< B').target = 'lt'
+        split.operator(MeshSelectOperator.bl_idname, icon='NONE', text='<= B').target = 'le'
+        split.operator(MeshSelectOperator.bl_idname, icon='NONE', text='== B').target = 'eq'
+        split.operator(MeshSelectOperator.bl_idname, icon='NONE', text='B <=').target = 'ge'
+        split.operator(MeshSelectOperator.bl_idname, icon='NONE', text='B <').target = 'gt'
 
         row = layout.row()
         split = row.split(0.18, align=True)
         split.label(' ')
         label = bpy.app.translations.pgettext('selutl.SymmetryLTB')
-        split.operator(MESH_OP_select_symmetry.bl_idname, icon='NONE', text=label).target = 'lt'
+        split.operator(MeshSelectSymOperator.bl_idname, icon='NONE', text=label).target = 'lt'
         label = bpy.app.translations.pgettext('selutl.SymmetryGTB')
-        split.operator(MESH_OP_select_symmetry.bl_idname, icon='NONE', text=label).target = 'gt'
+        split.operator(MeshSelectSymOperator.bl_idname, icon='NONE', text=label).target = 'gt'
 
         row = layout.row()
         split = row.split(0.75)
         split.prop(scn, 'TrzrSelUtilBase', icon='NONE')
-        split.operator(MESH_OP_select_set_base.bl_idname, text='0')
+        split.operator(MeshSelectBaseClearer.bl_idname, text='0')
         row = layout.row()
         split = row.split(0.75)
         split.prop(scn, 'TrzrSelUtilMargin', icon='NONE')
         # split.operator('mesh.select_util_set_margin', text='0').value=0
-        split.operator(MESH_OP_select_set_margin.bl_idname, text='0.0001').value = 0.0001
+        split.operator(MeshSelectMarginSetter.bl_idname, text='0.0001').value = 0.0001
 
 
-class MESH_OP_select_set_base(bpy.types.Operator):  # type: ignore
+class MeshSelectBaseClearer(bpy.types.Operator):  # type: ignore
     bl_idname = 'mesh.trzr_select_base_clear'
     bl_label = "clear base"
     bl_description = bpy.app.translations.pgettext('selutl.ClearBaseDesc')
@@ -289,7 +285,7 @@ class MESH_OP_select_set_base(bpy.types.Operator):  # type: ignore
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
         ob = context.active_object
-        return (ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
+        return ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):  # type: (bpy.types.Context) -> Set
         ob = context.active_object
@@ -298,7 +294,7 @@ class MESH_OP_select_set_base(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class MESH_OP_select_set_margin(bpy.types.Operator):  # type: ignore
+class MeshSelectMarginSetter(bpy.types.Operator):  # type: ignore
     bl_idname = 'mesh.trzr_select_set_margin'
     bl_label = "set default margin"
     bl_description = bpy.app.translations.pgettext('selutl.SetDefaultMarginDesc')
@@ -308,7 +304,7 @@ class MESH_OP_select_set_margin(bpy.types.Operator):  # type: ignore
     @classmethod
     def poll(cls, context):  # type: (bpy.types.Context) -> bool
         ob = context.active_object
-        return (ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
+        return ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):  # type: (bpy.types.Context) -> Set
         ob = context.active_object
@@ -333,7 +329,7 @@ def register():  # type: () -> None
             ('z', 'z', "", '', 2)
         ], default='x')
 
-    bpy.types.Scene.TrzrSelUtilBase   = bpy.props.FloatProperty(name='selutl.BasePointB', default=0.0, step=0.1, precision=5)
+    bpy.types.Scene.TrzrSelUtilBase = bpy.props.FloatProperty(name='selutl.BasePointB', default=0.0, step=0.1, precision=5)
     bpy.types.Scene.TrzrSelUtilMargin = bpy.props.FloatProperty(name='selutl.Margin', default=0.0001, min=0, soft_min=0, step=0.01, precision=5)
 
 

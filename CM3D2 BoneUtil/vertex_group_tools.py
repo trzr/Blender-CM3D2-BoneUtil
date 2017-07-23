@@ -34,7 +34,7 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
     bl_description = "ボーン情報から頂点グループを作成します"
     bl_options = {'REGISTER', 'UNDO'}
 
-    skip_nub       = bpy.props.BoolProperty(name="nubボーン スキップ", default=True, description="末端ボーンをスキップ")
+    skip_nub = bpy.props.BoolProperty(name="nubボーン スキップ", default=True, description="末端ボーンをスキップ")
     skip_shapekeys = bpy.props.BoolProperty(name="シェイプキーと同名をスキップ", default=True, description="シェイプキーと同名のボーンをスキップ")
 
     src_data = bpy.props.EnumProperty(
@@ -115,7 +115,7 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
             if shape_keys:
                 ignores = set()
                 for key in shape_keys.key_blocks.keys():
-                    ignores.add( key.lower() )
+                    ignores.add(key.lower())
 
         created = 0
         for bone_name in target_bonenames:
@@ -124,10 +124,10 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
             if bone_name == bb_name or bone_name in ob.vertex_groups:
                 continue
 
-            bone_nameL = bone_name.lower()
-            if self.skip_nub and bone_nameL.endswith('nub'):
+            bone_name_l = bone_name.lower()
+            if self.skip_nub and bone_name_l.endswith('nub'):
                 continue
-            if ignores and bone_nameL in ignores:
+            if ignores and bone_name_l in ignores:
                 continue
 
             ob.vertex_groups.new(bone_name)
