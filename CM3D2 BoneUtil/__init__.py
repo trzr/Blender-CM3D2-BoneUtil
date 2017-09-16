@@ -1,13 +1,13 @@
 
 __author__ = "trzr"
 __status__ = "production"
-__version__ = "0.3.1"
-__date__ = "30 Jun 2017"
+__version__ = "0.3.2"
+__date__ = "16 Sep 2017"
 
 bl_info = {
     "name": "CM3D2 BoneUtil",
     "author": "trzr",
-    "version": (0, 3, 1),
+    "version": (0, 3, 2),
     "blender": (2, 76, 0),
     "location": "AddonDesc",
     "description": "Bone data utility for CM3D2",
