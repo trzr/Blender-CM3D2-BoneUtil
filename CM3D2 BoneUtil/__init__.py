@@ -22,9 +22,9 @@ if "bpy" in locals():
     import imp
 
     imp.reload(translations)
-    imp.reload(common)
     imp.reload(bonedata_importer)
     imp.reload(bonetype_renamer)
+    # imp.reload(bone_edit)
 
     imp.reload(blendset_importer)
     imp.reload(addon_updater)
@@ -38,6 +38,7 @@ else:
     from . import translations
     from . import bonedata_importer
     from . import bonetype_renamer
+    # from . import bone_edit
 
     from . import blendset_importer
     from . import addon_updater
@@ -61,7 +62,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
 
     vgfeature = bpy.props.BoolProperty(name="頂点グループ関連機能", description="頂点グループ関連の機能を追加します", default=False)
 
-    backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt", description="butl.shapekey.Menu.BackupExtDesc", default='bak')
+    backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt",
+                                          description="butl.shapekey.Menu.BackupExtDesc", default='bak')
     menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
                                                  description="butl.shapekey.Menu.TargetDirDesc")
     menu_import_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
