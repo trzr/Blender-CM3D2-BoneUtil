@@ -82,9 +82,9 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
         split1 = row1.split(percentage=0.6, align=True)
         split1.prop(bsl, "target_name", text="")
         label = bpy.app.translations.pgettext('butl.shapekey.Reflect')
-        split1.operator(BlendsetReflector.bl_idname, icon='MOVE_DOWN_VEC', text=label)
+        split1.operator(BlendsetReflector.bl_idname, icon='TRIA_DOWN', text=label)
         label = bpy.app.translations.pgettext('butl.shapekey.Regist')
-        split1.operator(BlendsetRegister.bl_idname, icon='MOVE_UP_VEC', text=label)
+        split1.operator(BlendsetRegister.bl_idname, icon='TRIA_UP', text=label)
 
         subsplit = split1.split(percentage=0.5, align=True)
         subsplit.operator(BlendsetAdder.bl_idname, icon='ZOOMIN', text='')
