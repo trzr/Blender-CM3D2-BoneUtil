@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 
 addon_name = "CM3D2 BoneUtil"
-pt_includeNum = re.compile('.*(0[1-9]|1[0-2]).*')
+# pt_includeNum = re.compile('.*([01[1-9]|2[0-4]).*')
 
 
 # このアドオンの設定値群を呼び出す
@@ -23,11 +23,10 @@ def remove_serial_num(name):  # type: (str) -> str
 def parse_bonetype(name):  # type: (str) -> Optional[str]
     if '_skirt_' in name:
 
-        if pt_includeNum.match(remove_serial_num(name)):
-            if '_h_' in name:
-                return 'skirt_h'
-            else:
-                return 'skirt'
+        if '_h_' in name:
+            return 'skirt_h'
+        else:
+            return 'skirt'
     elif '_yure_hair_' in name:
         if '_h_' in name:
             return 'hair_h'
@@ -57,15 +56,9 @@ def replace_bonename(name, source_type, target_type):  # type: (str, str, str)  
         elif target_type == 'hair_h50':
             return name.replace(src_str, "_yure_hair_h50_")
         elif target_type == 'skirt':
-            if pt_includeNum.match(name):
-                return name.replace(src_str, "_yure_skirt_")
-            else:
-                return name.replace(src_str, "_01_yure_skirt_")
+            return name.replace(src_str, "_yure_skirt_")
         elif target_type == 'skirt_h':
-            if pt_includeNum.match(name):
-                return name.replace(src_str, "_yure_skirt_h_")
-            else:
-                return name.replace(src_str, "_01_yure_skirt_h_")
+            return name.replace(src_str, "_yure_skirt_h_")
 
     elif source_type == 'hair' or source_type == 'hair_h' or source_type == 'hair_h50':
         if source_type == 'hair_h':
@@ -78,15 +71,9 @@ def replace_bonename(name, source_type, target_type):  # type: (str, str, str)  
             replace_str = '_yure_' + target_type + '_'
             return re.sub(r'(_)?_yure_hair_(_)?', replace_str, name)
         elif target_type == 'skirt':
-            if pt_includeNum.match(name):
-                return re.sub(r'(_)?_yure_hair_(_)?', "_yure_skirt_", name)
-            else:
-                return re.sub(r'(_)?_yure_hair_(_)?', "_01_yure_skirt_", name)
+            return re.sub(r'(_)?_yure_hair_(_)?', "_yure_skirt_", name)
         elif target_type == 'skirt_h':
-            if pt_includeNum.match(name):
-                return re.sub(r'(_)?_yure_hair_(_)?', "_yure_skirt_h_", name)
-            else:
-                return re.sub(r'(_)?_yure_hair_(_)?', "_01_yure_skirt_h_", name)
+            return re.sub(r'(_)?_yure_hair_(_)?', "_yure_skirt_h_", name)
 
     elif source_type == 'skirt' or source_type == 'skirt_h':
         if source_type == 'skirt_h':
