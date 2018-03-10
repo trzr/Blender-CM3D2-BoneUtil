@@ -72,8 +72,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
                                                 description="butl.shapekey.Menu.DefaultPath.ExportDesc")
 
     update_history = addon_updater.VersionHistory()
-    update_history.now_ver = [v for v in bl_info['version']]
-    version = '.'.join([str(v) for v in bl_info['version']])
+    update_history.now_ver = [v for v in bl_info['version']]  # type: ignore
+    version = '.'.join([str(v) for v in bl_info['version']])  # type: ignore
 
     def draw(self, context):  # type: (bpy.context) -> None
         layout = self.layout

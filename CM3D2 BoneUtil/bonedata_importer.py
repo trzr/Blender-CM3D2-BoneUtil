@@ -53,7 +53,7 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
     def __init__(self):  # type: () -> None
         self.bb_name_old = None  # type: Optional[str]
         self.target_props = None  # type: Any
-        self.target_bones = None
+        self.target_bones = None  # type: bpy.prop.collection
         self.is_mesh = False
 
     @classmethod
@@ -197,7 +197,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
     #     ], default='2001')
 
     def __init__(self):  # type: () -> None
-        self.is_old = False
+        self.is_oldmode = False
 
         self.bonedata_idx = 0
         self.bd_dic = {}   # type: Dict
@@ -207,7 +207,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.coor = None
         self.rotor = None  # BaseBoneが回転している場合があるため追加 by夜勤D
         self.target_props = None  # type: Any
-        self.target_bones = {}   # type: Dict
+        self.target_bones = {}   # type: bpy.prop.collection
         # self.target_data = None
         self.bone_names = set()  # type: Set[str]
         self.treated_bones = set()  # type: Set
@@ -216,7 +216,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.count_lbd_add = 0
         self.count_lbd_update = 0
 
-        self.target_data = None
+        self.target_data = None  # type: bpy.prop.collection
         self.is_mesh = False
 
     @classmethod
@@ -254,7 +254,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
         # 前回が自動判定以外の場合、ボーン情報をチェック
         if self.act_mode != 'auto':
-            ret = self.check_old()
+            ret = self.check_oldmode()
             if ret > 0:
                 self.act_mode = 'old'
             elif ret == 0:
@@ -291,11 +291,11 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.treated_bones.clear()
 
         self.bone_names.clear()
-        self.is_old = False
+        self.is_oldmode = False
         if self.act_mode == 'auto':
-            self.is_old = (self.check_old() > 0)
+            self.is_oldmode = (self.check_oldmode() > 0)
         elif self.act_mode == 'old':
-            self.is_old = True
+            self.is_oldmode = True
 
         for target_bone in self.target_bones:
             bone_name = common.remove_serial_num(target_bone.name)
@@ -389,7 +389,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 ob.parent.hide = src_hide_parent
 
         # 処理件数を出力する。BoneData数, LocalBoneData数
-        if self.is_old:
+        if self.is_oldmode:
             msgopt = "[old mode]"
         else:
             msgopt = ""
@@ -522,7 +522,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
     # 旧版の取り込みデータであるかの判定 (やっつけ)
     # return 1 => 旧版 (0 => 新版, -1 => 不明)
-    def check_old(self):  # type: () -> int
+    def check_oldmode(self):  # type: () -> int
         if 'Bip01' in self.target_bones:
             if round(self.target_bones['Bip01'].length - 1.0, 6) == 0:
                 return 0
@@ -571,7 +571,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 c0.x, c0.y, c0.z = -c0.x, c0.z, -c0.y
                 bone_v = c0
                 r0 = bone_mat.to_quaternion()
-                if self.is_old:
+                if self.is_oldmode:
                     r0 *= mathutils.Quaternion((0, 0, 1), math.radians(90))
                     r0.w, r0.x, r0.y, r0.z, = -r0.w, -r0.x, r0.z, -r0.y
                 else:
@@ -587,7 +587,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 # bone_q = bone_mat.to_quaternion()
                 bone_v = (bone_d.head_local - bone_d.parent.head_local) * bone_d.parent.matrix_local / self.scale
                 bone_q = bone_d.matrix.to_3x3().to_quaternion()
-                if self.is_old:
+                if self.is_oldmode:
                     bone_v.x, bone_v.y, bone_v.z = -bone_v.y, bone_v.z, bone_v.x
                     bone_q.w, bone_q.x, bone_q.y, bone_q.z = bone_q.w, bone_q.y, -bone_q.z, -bone_q.x
 
@@ -615,7 +615,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             # add bonedata "_nub"
             if not is_nub and len(targetbone.children) == 0:
                 # 長さが基準のままであればnub不要と判断
-                if self.is_old:
+                if self.is_oldmode:
                     base_length = 0.2 * self.scale if targetbone.parent is None else 0.1
                 else:
                     base_length = 0.2 * self.scale if targetbone.parent is None else targetbone.parent.length * 0.5
@@ -655,7 +655,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
                     bone_vt = (bone_d.tail_local - bone_d.head_local) * bone_d.matrix_local / self.scale
                     bone_qt = bone_d.matrix.to_3x3().to_quaternion()
-                    if self.is_old:
+                    if self.is_oldmode:
                         bone_vt.x, bone_vt.y, bone_vt.z = -bone_vt.y, bone_vt.z, bone_vt.x
                         bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z = bone_qt.w, bone_qt.y, -bone_qt.z, -bone_qt.x
                     else:
@@ -685,7 +685,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
             if not lbd_skip:
                 qlb = bone_d.matrix_local.to_quaternion()
-                if self.is_old:
+                if self.is_oldmode:
                     qlb.w, qlb.x, qlb.y, qlb.z = qlb.w, qlb.y, -qlb.z, -qlb.x
                     rotate_first = mathutils.Matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])  # mathutils.Euler((0, math.radians(-90), 0), 'XYZ')
                 else:

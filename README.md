@@ -8,7 +8,7 @@
 
 ## ■ インストール (Installation)
 #### ◇事前準備
-　Blender2.76以上(動作確認は[2.78c][blender278])がインストールされていることが前提です。
+　Blender2.76以上(動作確認は[2.79a][blender279])がインストールされていることが前提です。
 
 #### ◇ダウンロード・展開
 　[Releases][]のリンク先にある該当バージョンか、
@@ -41,7 +41,7 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
 |:---|:----|
 | **[BoneData取り込み機能][BoneImport]** | Blender上のボーンからBoneDataを取込む機能|
 | **[揺れボーンタイプ 一括変更機能][BoneTypeRename]** （オプション） | 揺れボーンの型を一括で変更する機能|
-| **[シェイプキー値反映機能][BlendsetEdit]** | blendsetを元に、シェイプキーの値を一括で変更する機能|
+| **[シェイプキー 一括操作機能][BlendsetEdit]** | blendsetを元に、シェイプキーの値を一括で変更する機能|
 
 
 ## ■ 免責
@@ -49,14 +49,13 @@ C:\Users\UserA\AppData\Roaming\Blender Foundation\Blender\2.78\scripts\addons\CM
   各自の責任において使用してください。
 
 ## ■ 謝辞
-  ボーン計算式の大部分は、[夜勤D][]さんの作成されたスクリプトをベースとしております。  
-  また、Blenderアドオン作成については [CM3D2 Converter][]を参考にさせてもらっています。  
-  これ以外にも、twitterで多数助言をいただいております。  
-  支援くださった皆様に感謝  
+  ボーン計算式のベースは、[夜勤D][]さんの作成されたスクリプトを参考にさせていただいております。  
+  Blenderアドオン作成についても [CM3D2 Converter][]を参考にさせていただきました。  
+  また、twitterでも多くの方に刺激や助言をいただいております。感謝！   
 
 
 [CM3D2 Converter]:https://github.com/CM3Duser/Blender-CM3D2-Converter
-[blender278]:http://download.blender.org/release/Blender2.78/
+[blender279]:http://download.blender.org/release/Blender2.79/
 [master_zip]:https://github.com/trzr/Blender-CM3D2-BoneUtil/archive/master.zip
 [Releases]:https://github.com/trzr/Blender-CM3D2-BoneUtil/releases
 [wiki]:https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki
