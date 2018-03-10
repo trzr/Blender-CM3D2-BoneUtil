@@ -151,6 +151,7 @@ class BoneData1(object):  # type: ignore
         self.children = []  # type: List
         self.co = ''
         self.rot = ''
+        self.scale = None
         self.prop_name = prop_name
         self.parent = None
         self.no_exist = False
@@ -188,6 +189,12 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             ('auto', 'butl.bdimport.AutoDetect', 'butl.bdimport.AutoDetectDesc', 'PROP_ON', 1),
             ('old', 'butl.bdimport.OldMode', 'butl.bdimport.OldModeDesc', 'PROP_OFF', 2),
         ], default='normal')
+    # model_ver = bpy.props.EnumProperty(
+    #     name="ModelVer",
+    #     items=[
+    #         ('2001', '2001', 'butl.bdimport.Model2001Desc', 'NONE', 0),
+    #         ('1000', '1000', 'butl.bdimport.Model1000Desc', 'NONE', 1),
+    #     ], default='2001')
 
     def __init__(self):  # type: () -> None
         self.is_old = False
@@ -227,18 +234,23 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
     def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
         ob = context.active_object
+        self.version = 1000
         if ob.type == 'ARMATURE':
             self.bb_name = ob.data['BaseBone']
             self.target_props = ob.data
             self.target_data = ob.data
             self.target_bones = ob.data.bones
             self.is_mesh = False
+            if 'ModelVersion' in ob.data:
+                self.version = ob.data['ModelVersion']
         elif ob.type == 'MESH':
             self.bb_name = ob['BaseBone']
             self.target_props = ob
             self.target_data = ob.parent.data
             self.target_bones = ob.parent.data.bones
             self.is_mesh = True
+            if 'ModelVersion' in ob:
+                self.version = ob['ModelVersion']
 
         # 前回が自動判定以外の場合、ボーン情報をチェック
         if self.act_mode != 'auto':
@@ -264,6 +276,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
         self.layout.label(text="butl.bdimport.ActionMode:", icon='HAND')
         self.layout.prop(self, 'act_mode', icon='NONE', expand=True)
+        # self.layout.prop(self, 'model_ver', icon='NONE', expand=True)
 
         ob = context.active_object
         if ob.type == 'MESH':
@@ -412,6 +425,8 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                     node = BoneData1(bone_name, bdlist[1], bdlist[2], prop_name)
                     node.co = bdlist[3]
                     node.rot = bdlist[4]
+                    if len(bdlist) >= 7:
+                        node.scale = bdlist[6]
                     self.bd_dic[bone_name] = node
                     if bone_name not in self.bone_names:
                         if bone_name != self.bb_name:  # skip BaseBone
@@ -524,6 +539,20 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                         return 1
         return -1
 
+    def create_bonedata_string(self, bone_name, sclflag, parent_name, bone_v, bone_q, bdata):
+        string_bone = "{0},{1},{2},{3:.17} {4:.17} {5:.17},{6:.17} {7:.17} {8:.17} {9:.17}".format(
+            bone_name, sclflag, parent_name,
+            bone_v.x, bone_v.y, bone_v.z,
+            bone_q.w, bone_q.x, bone_q.y, bone_q.z)
+
+        if self.version >= 2001:
+            if bdata and bdata.scale:
+                string_bone += ",1," + bdata.scale
+            else:
+                string_bone += ",0"
+
+        return string_bone
+
     def calc_bonedata(self, targetbone, recursive=False):  # type: (Any, Any, bool) -> None
         bone_name = targetbone.name
         bone_d = self.target_bones[bone_name]
@@ -579,10 +608,8 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 self.bonedata_idx += 1
                 sclflag = 0
 
-            string_bone = "{0},{1},{2},{3:.17} {4:.17} {5:.17},{6:.17} {7:.17} {8:.17} {9:.17}".format(
-                bone_name, sclflag, parentbone_name,
-                bone_v.x, bone_v.y, bone_v.z,
-                bone_q.w, bone_q.x, bone_q.y, bone_q.z)
+            string_bone = self.create_bonedata_string(bone_name, sclflag, parentbone_name, bone_v, bone_q, bdata1)
+
             self.target_props[active_prop_name] = string_bone
 
             # add bonedata "_nub"
@@ -635,10 +662,8 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                         bone_vt.x, bone_vt.y, bone_vt.z = -bone_vt.y, -bone_vt.x, bone_vt.z
                         bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z = bone_qt.w, bone_qt.y, bone_qt.x, -bone_qt.z
 
-                    string_bone_nub = "{0},{1},{2},{3:.17} {4:.17} {5:.17},{6:.17} {7:.17} {8:.17} {9:.17}".format(
-                        nub_bonename, nub_scl, bone_name,
-                        bone_vt.x, bone_vt.y, bone_vt.z,
-                        bone_qt.w, bone_qt.x, bone_qt.y, bone_qt.z)
+                    bdata2 = self.bd_dic.get(nub_bonename)
+                    string_bone_nub = self.create_bonedata_string(nub_bonename, nub_scl, bone_name, bone_vt, bone_qt, bdata2)
 
                     # print("write:" + active_prop_name)
                     if add_prop_name is None:
