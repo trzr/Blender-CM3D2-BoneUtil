@@ -38,20 +38,17 @@ class CM3D2BoneUtilUpdater(bpy.types.Operator):  # type: ignore
 
         url = hist.links[0][1]
         response = urllib.request.urlopen(url)
-        zip_writer = open(zip_path, "wb")
-        zip_writer.write(response.read())
-        zip_writer.close()
+        with open(zip_path, "wb") as zip_writer:
+            zip_writer.write(response.read())
 
-        zip_reader = zipfile.ZipFile(zip_path, "r")
-        for path in zip_reader.namelist():
-            if not os.path.basename(path):
-                continue
-            sub_dir = os.path.split( os.path.split(path)[0] )[1]
-            if sub_dir == "CM3D2 BoneUtil":
-                file = open(os.path.join(addon_path, os.path.basename(path)), 'wb')
-                file.write(zip_reader.read(path))
-                file.close()
-        zip_reader.close()
+        with zipfile.ZipFile(zip_path, "r") as zip_reader:
+            for path in zip_reader.namelist():
+                if not os.path.basename(path):
+                    continue
+                sub_dir = os.path.split( os.path.split(path)[0] )[1]
+                if sub_dir == "CM3D2 BoneUtil":
+                    with open(os.path.join(addon_path, os.path.basename(path)), 'wb') as file:
+                        file.write(zip_reader.read(path))
 
         hist.now_ver = hist.latest_ver
         ver = '.'.join([ str(v) for v in hist.now_ver ])

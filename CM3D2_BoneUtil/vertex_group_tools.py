@@ -8,7 +8,7 @@ import os
 import re
 import sys
 from . import common
-from typing import List, Any, Match
+from typing import List, Any, Match, Set
 
 
 def menu_func_specials(self, context):  # type: (Any, bpy.types.Context) -> None
@@ -80,14 +80,14 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
         ob = context.active_object
         arm = ob.parent
 
-        bb_name = ''
         props = None
-        if 'BaseBone' in ob:
-            bb_name = ob['BaseBone']
+        bb_name = ob.get('BaseBone')
+        if bb_name:
             props = ob
-        elif 'BaseBone' in arm.data:
-            bb_name = arm.data['BaseBone']
-            props = arm.data
+        else:
+            bb_name = arm.data.get('BaseBone')
+            if bb_name:
+                props = arm.data
 
         # collect bonenames
         target_bonenames = []
@@ -140,4 +140,3 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
 
         self.report(type={'INFO'}, message=msg)
         return {'FINISHED'}
-

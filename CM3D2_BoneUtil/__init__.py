@@ -110,7 +110,6 @@ def register():  # type: () -> None
     bpy.types.DATA_PT_context_arm.append(bonedata_importer.menu_func_arm)
     bpy.types.OBJECT_PT_context_object.append(bonedata_importer.menu_func)
 
-    # bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
     bonetype_renamer.register()
     bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
     bpy.types.DATA_PT_context_arm.append(bonetype_renamer.menu_func_arm)
@@ -143,7 +142,6 @@ def unregister():  # type: () -> None
 
     bpy.types.DATA_PT_context_arm.remove(bonedata_importer.menu_func_arm)
     bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
-    # bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
 
     bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
     bpy.types.DATA_PT_context_arm.remove(bonetype_renamer.menu_func_arm)

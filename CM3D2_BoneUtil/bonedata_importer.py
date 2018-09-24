@@ -523,8 +523,9 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
     # 旧版の取り込みデータであるかの判定 (やっつけ)
     # return 1 => 旧版 (0 => 新版, -1 => 不明)
     def check_oldmode(self):  # type: () -> int
-        if 'Bip01' in self.target_bones:
-            if round(self.target_bones['Bip01'].length - 1.0, 6) == 0:
+        bone1 = self.target_bones.get('Bip01')
+        if bone1:
+            if round(bone1.length - 1.0, 6) == 0:
                 return 0
             else:
                 return 1

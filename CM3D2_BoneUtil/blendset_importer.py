@@ -626,10 +626,9 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
         ob = context.active_object
         props = ob.data
         self.filepath = ''
-        if 'menu_path' in props:
-            filepath = props['menu_path']
-            if os.path.exists(filepath):
-                self.filepath = filepath
+        filepath = props.get('menu_path')
+        if filepath and os.path.exists(filepath):
+            self.filepath = filepath
 
         if self.filepath is None:
             prefs = common.prefs()
