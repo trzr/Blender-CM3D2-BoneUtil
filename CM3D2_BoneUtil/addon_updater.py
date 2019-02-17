@@ -5,10 +5,10 @@ import json
 import os
 import urllib.request
 import zipfile
-import datetime
 # from urllib.error import URLError, HTTPError
 from . import common
 from . import compatibility as compat
+from datetime import datetime
 from typing import List, Tuple, Set, Optional, Any
 
 
@@ -69,17 +69,17 @@ class VersionHistory:
     url = 'https://api.github.com/repos/trzr/Blender-CM3D2-BoneUtil/releases'
 
     def __init__(self, ver: Tuple) -> None:
-        self.updated_time = None  # type: Optional[datetime.datetime]
-        self.vers: List = []  # type: List
-        self.titles: List = []  # type: List
-        self.updates: List = []  # type: List
-        self.links: List = []  # type: List
+        self.updated_time = None  # type: Optional[datetime]
+        self.vers: List = []
+        self.titles: List = []
+        self.updates: List = []
+        self.links: List = []
         # last_ver_date = None
-        self.now_ver: Tuple = ver  # type: Tuple
-        self.latest_ver: List = []  # type: List
+        self.now_ver: Tuple = ver
+        self.latest_ver: list = []
         self.latest_version: str = ''
 
-    def update(self, now: datetime.datetime) -> None:
+    def update(self, now: datetime) -> None:
         res = urllib.request.urlopen(VersionHistory.url)
         json_data = json.loads(res.read().decode('utf-8'))
 
@@ -156,7 +156,7 @@ class BUTL_MT_History(bpy.types.Menu):
         diff_seconds = 1000
 
         hist = common.prefs().update_history
-        now = datetime.datetime.now()
+        now = datetime.now()
         if hist.updated_time:
             diff_seconds = (now - hist.updated_time).seconds
         if diff_seconds > 600:
@@ -166,7 +166,7 @@ class BUTL_MT_History(bpy.types.Menu):
                 self.layout.label(text=bpy.app.translations.pgettext('butl.updater.History'), icon='ERROR')
                 return
 
-        utcnow = datetime.datetime.utcnow()
+        utcnow = datetime.utcnow()
         count = 0
         for title, update, link in zip(hist.titles, hist.updates, hist.links):
             diff_date = utcnow - update
