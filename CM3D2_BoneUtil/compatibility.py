@@ -44,7 +44,6 @@ class BlRegister:
     @classmethod
     def register(cls):
         for cls1 in cls.classes:
-            print(cls1)
             bpy.utils.register_class(cls1)
 
     @classmethod
@@ -165,3 +164,4 @@ def region_type():
     if IS_LEGACY:
         return 'TOOLS'
     return 'UI'
+
