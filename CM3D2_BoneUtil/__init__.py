@@ -1,168 +1,184 @@
-
 __author__ = "trzr"
-__status__ = "production"
-__version__ = "0.3.4"
-__date__ = "22 Jan 2018"
+__status__ = "develop"
+__version__ = "0.4.0"
+__date__ = "17 Feb 2019"  # ctrl+shift+I
 
 bl_info = {
     "name": "CM3D2 BoneUtil",
     "author": "trzr",
-    "version": (0, 3, 4),
-    "blender": (2, 76, 0),
-    "location": "AddonDesc",
-    "description": "Bone data utility for CM3D2",
+    "version": (0, 4, 0),
+    "blender": (2, 80, 0),
+    "location": 'Properties > Object Data (Mesh), etc...',
+    "description": "Bone data utility for CM3D2/COM3D2",
     "warning": "",
     "wiki_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki",
     "tracker_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/issues",
     "category": "Tools"
 }
 
+
 # サブスクリプト群をインポート
-if "bpy" in locals():
-    import imp
+# import importlib
+# import sys
+# import bpy
+# subfiles = [
+#     'translations',
+#     'common',
+#     'compatibility',
 
-    imp.reload(translations)
-    imp.reload(bonedata_importer)
-    imp.reload(bonetype_renamer)
-    # imp.reload(bone_edit)
+#     'addon_updater',
+#     'bonedata_importer',
+#     'bonetype_renamer',
 
-    imp.reload(blendset_importer)
-    imp.reload(addon_updater)
-    imp.reload(vertex_group_tools)
-    # imp.reload(shape_key_tools)
-    # imp.reload(attachpoint_tools)
+#     'blendset_importer',
+#     'vertex_group_tools',
+#     'selection_tool',
+# ]
 
-    imp.reload(selection_tool_mesh)
-    imp.reload(selection_tool_arm)
-else:
+# for name in subfiles:
+#     fullname = '{}.{}'.format(__package__, name)
+#     if fullname in sys.modules:
+#         importlib.reload(sys.modules[fullname])
+#     else:
+#         importlib.import_module(fullname)
+
+if 'bpy' not in locals():
     from . import translations
+    from . import common
+    from . import compatibility
+
+    from . import addon_updater
     from . import bonedata_importer
     from . import bonetype_renamer
-    # from . import bone_edit
 
     from . import blendset_importer
-    from . import addon_updater
     from . import vertex_group_tools
-    # from . import shape_key_tools
-    # from . import attachpoint_tools
 
-    from . import selection_tool_mesh
-    from . import selection_tool_arm
+    from . import selection_tool
+else:
+    import importlib
+
+    importlib.reload(translations)
+    importlib.reload(common)
+    importlib.reload(compatibility)
+
+    importlib.reload(addon_updater)
+    importlib.reload(bonedata_importer)
+    importlib.reload(bonetype_renamer)
+    # # importlib.reload(bone_edit)
+
+    importlib.reload(blendset_importer)
+    importlib.reload(vertex_group_tools)
+    # # importlib.reload(shape_key_tools)
+    # # importlib.reload(attachpoint_tools)
+
+    importlib.reload(selection_tool)
 
 import bpy
-import bpy.utils.previews
 
 
 # アドオン設定
-class AddonPreferences(bpy.types.AddonPreferences):
+class BUTL_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    bonetype_renamer = bpy.props.BoolProperty(name="butl.ChangeBoneTypeFeature", description="butl.ChangeBoneTypeFDesc", default=False)
-    bsimp = bpy.props.BoolProperty(name="butl.shapekey.BsImporterFeature", description="butl.shapekey.BsImporterFDesc", default=True)
+    feature_bonetype: bpy.props.BoolProperty(name="butl.feature.ChangeBoneType", description="butl.feature.ChangeBoneTypeDesc", default=False)
+    feature_importer: bpy.props.BoolProperty(name="butl.feature.BsImporter", description="butl.feature.BsImporterDesc", default=True)
+    feature_vgroups: bpy.props.BoolProperty(name="butl.feature.Vertexgroups", description="butl.feature.VertexgroupsDesc", default=False)
 
-    vgfeature = bpy.props.BoolProperty(name="頂点グループ関連機能", description="頂点グループ関連の機能を追加します", default=False)
-
-    backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt",
+    backup_ext: bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt",
                                           description="butl.shapekey.Menu.BackupExtDesc", default='bak')
-    menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
+    menu_default_path: bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
                                                  description="butl.shapekey.Menu.TargetDirDesc")
-    menu_import_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
+    menu_import_path: bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
                                                 description="butl.shapekey.Menu.DefaultPath.ImportDesc")
-    menu_export_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH',
+    menu_export_path: bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH',
                                                 description="butl.shapekey.Menu.DefaultPath.ExportDesc")
 
-    update_history = addon_updater.VersionHistory()
-    update_history.now_ver = [v for v in bl_info['version']]  # type: ignore
+    update_history = addon_updater.VersionHistory(bl_info['version'])
     version = '.'.join([str(v) for v in bl_info['version']])  # type: ignore
 
-    def draw(self, context):  # type: (bpy.context) -> None
+    def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
         layout.label(text="butl.PushSaveButton", icon='QUESTION')
         box = layout.box()
         box.label(text="butl.EnableOption", icon='DOT')
         row = box.row()
-        split = row.split(percentage=0.3, align=True)
-        split.prop(self, 'bonetype_renamer', icon='NONE')
-        split.prop(self, 'bsimp', icon='NONE')
-        split.prop(self, 'vgfeature', icon='NONE')
+        split = compatibility.layout_split(row, factor=0.3, align=True)
+        split.prop(self, 'feature_bonetype', icon='NONE')
+        split.prop(self, 'feature_importer', icon='NONE')
+        split.prop(self, 'feature_vgroups', icon='NONE')
 
         box = layout.box()
         box.prop(self, 'backup_ext', icon='FILE_BACKUP')
         box.label(text="butl.shapekey.Menu.File", icon='FILE_IMAGE')
-        box.prop(self, 'menu_default_path', icon='FILESEL', text="butl.shapekey.Menu.InitFolder")
+        box.prop(self, 'menu_default_path', icon=compatibility.icon('FILE_FOLDER'), text="butl.shapekey.Menu.InitFolder")
+
 
         row = layout.row()
-
         # row.label(self, 'version', icon='INFO')
-        row.menu('INFO_MT_CM3D2_BoneUtil_history', icon='INFO')
+        row.menu(addon_updater.BUTL_MT_History.bl_idname, icon='INFO')
 
-        v = self.version
-        if self.update_history.has_update():
-            v += ' => ' + self.update_history.latest_version
+        v = BUTL_AddonPreferences.version
+        if BUTL_AddonPreferences.update_history.has_update():
+            v += ' => ' + BUTL_AddonPreferences.update_history.latest_version
         row.label(text=v)
-        row.operator('script.trzr_update_cm3d2_boneutil', icon='FILE_REFRESH')
+        row.operator(addon_updater.BUTL_OT_Updater.bl_idname, icon='FILE_REFRESH')
 
 
-def register():  # type: () -> None
-    bpy.utils.register_module(__name__)
-    bpy.app.translations.register(__name__, translations.dic)
+classes = (
+    BUTL_AddonPreferences,
+)
 
+
+def register():
+    bpy.app.translations.register(__name__, translations.get_dic())
+
+    # register classes
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    compatibility.BlRegister.register()
+
+    # append menu
     bpy.types.DATA_PT_context_arm.append(bonedata_importer.menu_func_arm)
-    bpy.types.OBJECT_PT_context_object.append(bonedata_importer.menu_func)
-
-    bonetype_renamer.register()
-    bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
     bpy.types.DATA_PT_context_arm.append(bonetype_renamer.menu_func_arm)
-
-    blendset_importer.register()
     bpy.types.DATA_PT_context_mesh.append(blendset_importer.menu_func)
-    # bpy.types.DATA_PT_shape_keys.append(blendset_importer.menu_func)
 
-    # bpy.types.DATA_PT_vertex_groups.append(vertex_group_tools.menu_func)
+    bpy.types.OBJECT_PT_context_object.append(bonedata_importer.menu_func)
+    bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
+
     bpy.types.MESH_MT_vertex_group_specials.append(vertex_group_tools.menu_func_specials)
 
-    # shape_key_tools.register()
-    # bpy.types.MESH_MT_shape_key_specials.append(shape_key_tools.menu_func_specials)
-    # bpy.types.DATA_PT_shape_keys.append(shape_key_tools.menu_func)
-
-    # bpy.types.OBJECT_PT_transform.append(attachpoint_tools.menu_func)
-
-    selection_tool_mesh.register()
-    selection_tool_arm.register()
-
-    system = bpy.context.user_preferences.system
-    if not system.use_international_fonts:
-        system.use_international_fonts = True
-    if not system.use_translate_interface:
-        system.use_translate_interface = True
+    # initialize properties
+    bpy.types.Scene.trzr_select_props = bpy.props.PointerProperty(type=selection_tool.LocalProps)
+    bpy.types.Scene.trzr_butl_bone_list = bpy.props.PointerProperty(type=bonetype_renamer.ItemGroup)
+    bpy.types.Scene.trzr_butl_bone_props = bpy.props.PointerProperty(type=bonetype_renamer.YureBoneProps)
+    bpy.types.Scene.trzr_butl_blendsets = bpy.props.PointerProperty(type=blendset_importer.Blendsets)
 
 
-def unregister():  # type: () -> None
-    bpy.utils.unregister_module(__name__)
+def unregister():
+    # delete properties
+    del bpy.types.Scene.trzr_butl_blendsets
+    del bpy.types.Scene.trzr_butl_bone_props
+    del bpy.types.Scene.trzr_butl_bone_list
+    del bpy.types.Scene.trzr_select_props
 
-    bpy.types.DATA_PT_context_arm.remove(bonedata_importer.menu_func_arm)
-    bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
-
-    bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
-    bpy.types.DATA_PT_context_arm.remove(bonetype_renamer.menu_func_arm)
-    bonetype_renamer.unregister()
-
-    blendset_importer.unregister()
-    bpy.types.DATA_PT_context_mesh.remove(blendset_importer.menu_func)
-
-    # bpy.types.DATA_PT_vertex_groups.remove(vertex_group_tools.menu_func)
+    # remove menu
     bpy.types.MESH_MT_vertex_group_specials.remove(vertex_group_tools.menu_func_specials)
 
-    # bpy.types.MESH_MT_shape_key_specials.remove(shape_key_tools.menu_func)
-    # shape_key_tools.unregister()
+    bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
+    bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
 
-    # bpy.types.OBJECT_PT_transform.remove(attachpoint_tools.menu_func)
+    bpy.types.DATA_PT_context_mesh.remove(blendset_importer.menu_func)
+    bpy.types.DATA_PT_context_arm.remove(bonedata_importer.menu_func_arm)
+    bpy.types.DATA_PT_context_arm.remove(bonetype_renamer.menu_func_arm)
 
-    selection_tool_mesh.unregister()
-    selection_tool_arm.unregister()
+    # unregister classes
+    compatibility.BlRegister.unregister()
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
 
     bpy.app.translations.unregister(__name__)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     register()

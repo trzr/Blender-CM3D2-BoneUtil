@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import bpy  # type: ignore
+import bpy
+import mathutils
 import math
-import mathutils  # type: ignore
 import os
 import sys
 from . import common
+from . import compatibility as compat
 from typing import Dict, Set, List, Tuple, Optional, Any
 
 
-def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
+def menu_func(self, context: bpy.types.Context) -> None:
     ob = context.active_object
     if not ob or ob.type != 'MESH':
         return
@@ -22,7 +23,7 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
     menu_func_common(self, context)
 
 
-def menu_func_arm(self, context):  # type: (Any, bpy.types.Context) -> None
+def menu_func_arm(self, context: bpy.types.Context) -> None:
     ob = context.active_object
     if not ob or ob.type != 'ARMATURE':
         return
@@ -30,25 +31,27 @@ def menu_func_arm(self, context):  # type: (Any, bpy.types.Context) -> None
     menu_func_common(self, context)
 
 
-def menu_func_common(self, context):  # type: (Any, bpy.types.Context) -> None
+def menu_func_common(self, context: bpy.types.Context) -> None:
     layout = self.layout
-    split = layout.split(0.3, align=True)
+
+    split = compat.layout_split(layout, factor=0.3, align=True)
     split.label(text="butl.bdimport.ImportBoneData4CM3D2", icon='IMPORT')
 
     label = bpy.app.translations.pgettext('butl.bdimport.ImportBoneData')
-    split.operator(CM3D2BoneDataImporter.bl_idname, icon='CONSTRAINT_BONE', text=label)
+    split.operator(BUTL_OT_BoneDataImporter.bl_idname, icon='CONSTRAINT_BONE', text=label)
     label = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBone')
-    split.operator(CM3D2BaseBoneRenamer.bl_idname, icon='BONE_DATA', text=label)
+    split.operator(BUTL_OT_BaseBoneRenamer.bl_idname, icon='BONE_DATA', text=label)
 
 
-class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BaseBoneRenamer(bpy.types.Operator):
     bl_idname = 'object.trzr_rename_cm3d2_basebone'
     bl_label = 'Rename BaseBone'
     bl_description = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBoneDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
-    bb_name = bpy.props.StringProperty(name="butl.BaseBoneName")
-    change_bonename = bpy.props.BoolProperty(name="butl.RenameBone", default=False)
+    bb_name: bpy.props.StringProperty = bpy.props.StringProperty(name="butl.BaseBoneName")
+    change_bonename: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.RenameBone", default=False)
 
     def __init__(self):  # type: () -> None
         self.bb_name_old = None  # type: Optional[str]
@@ -57,7 +60,7 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
         self.is_mesh = False
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob:
             if ob.type == 'ARMATURE':
@@ -67,7 +70,7 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
 
         return False
 
-    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
+    def invoke(self, context: bpy.types.Context, event: Any) -> set:
         ob = context.active_object
         self.bb_name = ''
         if ob.type == 'ARMATURE':
@@ -86,7 +89,7 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
         self.bb_name_old = self.bb_name
         return context.window_manager.invoke_props_dialog(self)
 
-    def draw(self, context):  # type: (bpy.types.Context) -> None
+    def draw(self, context: bpy.types.Context) -> None:
         self.layout.prop(self, 'bb_name', icon='SORTALPHA')
         # self.layout.prop(self, 'target_type', icon='BONE_DATA')
 
@@ -94,7 +97,7 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
             row = self.layout.row(align=True)
             row.prop(self, 'change_bonename', icon='NONE')
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         ob = context.active_object
         self.bb_name_old = self.target_props['BaseBone']
         if self.bb_name == self.bb_name_old:
@@ -133,22 +136,22 @@ class CM3D2BaseBoneRenamer(bpy.types.Operator):  # type: ignore
                         props[prop_name] = bdlist[0] + ',' + bdlist[1]
                         props['BaseBone'] = bb_name
                         return prop_name
-                        break
+
                 except:
                     pass
         return ''
 
 
-class BoneData1(object):  # type: ignore
+class BoneData1(object):
 
-    def __init__(self, name, sclflag, parent_name, prop_name):  # type: (str, int, str, str) -> None
+    def __init__(self, name: str, sclflag: int, parent_name: str, prop_name: str) -> None:
         self.sclflag = 0
         self.name = name
         self.is_nub = name.lower().endswith('nub')
         self.sclflag = sclflag
         self.parent_name = parent_name
         self.has_parent = (parent_name != "None")
-        self.children = []  # type: List
+        self.children: List = []
         self.co = ''
         self.rot = ''
         self.scale = None
@@ -157,7 +160,8 @@ class BoneData1(object):  # type: ignore
         self.no_exist = False
 
 
-class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BoneDataImporter(bpy.types.Operator):
     bl_idname = 'object.trzr_import_cm3d2_bonedata'
     bl_label = 'Import BoneData'
     bl_description = bpy.app.translations.pgettext('butl.bdimport.ImportBoneDataDesc')
@@ -170,12 +174,12 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         ('Descendant', 'butl.EnumDescendant', "", '', 2),
     ]
     target_type = bpy.props.EnumProperty(name="Target", items=target_items, default='Descendant')
-    scale = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="butl.ScaleDesc")
-    import_bd = bpy.props.BoolProperty(name="BoneData", default=True)
+    scale      = bpy.props.FloatProperty(name="Scale", default=5, min=0.1, max=100, soft_min=0.1, soft_max=100, step=100, precision=1, description="butl.ScaleDesc")
+    import_bd  = bpy.props.BoolProperty(name="BoneData", default=True)
     import_lbd = bpy.props.BoolProperty(name="LocalBoneData", default=True)
-    sync_bd = bpy.props.BoolProperty(name="butl.bdimport.RemoveBoneDataNonExistent", default=False)
+    sync_bd    = bpy.props.BoolProperty(name="butl.bdimport.RemoveBoneDataNonExistent", default=False)
     exclude_ikbd = bpy.props.BoolProperty(name="butl.bdimport.ExcludeIKBoneDataForRemove", default=True)
-    vg_opr = bpy.props.EnumProperty(
+    vg_opr     = bpy.props.EnumProperty(
         name="VertexGroup",
         items=[
             ('add', 'Add', "butl.bdimport.AddVGDesc", 'PLUS', 0),
@@ -196,7 +200,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
     #         ('1000', '1000', 'butl.bdimport.Model1000Desc', 'NONE', 1),
     #     ], default='2001')
 
-    def __init__(self):  # type: () -> None
+    def __init__(self):
         self.is_oldmode = False
 
         self.bonedata_idx = 0
@@ -220,7 +224,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.is_mesh = False
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob:
             if ob.type == 'ARMATURE':
@@ -232,7 +236,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                         return True
         return False
 
-    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
+    def invoke(self, context: bpy.types.Context, event: Any) -> set:
         ob = context.active_object
         self.version = 1000
         if ob.type == 'ARMATURE':
@@ -241,16 +245,18 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             self.target_data = ob.data
             self.target_bones = ob.data.bones
             self.is_mesh = False
-            if 'ModelVersion' in ob.data:
-                self.version = ob.data['ModelVersion']
+            ver = ob.data.get('ModelVersion')
+            if ver:
+                self.version = ver
         elif ob.type == 'MESH':
             self.bb_name = ob['BaseBone']
             self.target_props = ob
             self.target_data = ob.parent.data
             self.target_bones = ob.parent.data.bones
             self.is_mesh = True
-            if 'ModelVersion' in ob:
-                self.version = ob['ModelVersion']
+            ver = ob.get('ModelVersion')
+            if ver:
+                self.version = ver
 
         # 前回が自動判定以外の場合、ボーン情報をチェック
         if self.act_mode != 'auto':
@@ -262,11 +268,11 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
         return context.window_manager.invoke_props_dialog(self)
 
-    def draw(self, context):  # type: (bpy.types.Context) -> None
+    def draw(self, context: bpy.types.Context) -> None:
         self.layout.prop(self, 'bb_name', icon='SORTALPHA')
         self.layout.prop(self, 'target_type', icon='BONE_DATA')
 
-        self.layout.prop(self, 'scale', icon='MAN_SCALE')
+        self.layout.prop(self, 'scale', icon=compat.icon('ARROW_LEFTRIGHT'))  # MAN_SCALE
         self.layout.label(text="butl.ImportTarget:", icon='IMPORT')
         row = self.layout.row(align=True)
         row.prop(self, 'import_bd', icon='NONE')
@@ -283,7 +289,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             self.layout.label(text="butl.VertexGroup:", icon='GROUP_VERTEX')
             self.layout.prop(self, 'vg_opr', icon='NONE', expand=True)
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         self.count_bd_add = 0
         self.count_bd_update = 0
         self.count_lbd_add = 0
@@ -307,11 +313,11 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         # 表示状態に設定
         count_bd_del, count_lbd_del = 0, 0
         ob = context.active_object
-        src_hide = ob.hide
-        ob.hide = False
+        src_hide = compat.get_hide(ob)
+        compat.set_hide(ob, False)
         if self.is_mesh:
-            src_hide_parent = ob.parent.hide
-            ob.parent.hide = False
+            src_hide_parent = compat.get_hide(ob.parent)
+            compat.set_hide(ob.parent, False)
 
         try:
             self.parse_bonedata()
@@ -384,9 +390,9 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             self.lbd_dic.clear()
 
             # 表示状態を復元
-            ob.hide = src_hide
+            compat.set_hide(ob, src_hide)
             if self.is_mesh and src_hide_parent:
-                ob.parent.hide = src_hide_parent
+                compat.set_hide(ob.parent, src_hide_parent)
 
         # 処理件数を出力する。BoneData数, LocalBoneData数
         if self.is_oldmode:
@@ -402,7 +408,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.report(type={'INFO'}, message=msg)
         return {'FINISHED'}
 
-    def parse_bonedata(self):  # type: (Any) -> None
+    def parse_bonedata(self):
         lbd_dic0 = {}
         # BoneData = namedtuple('bonedata', ['name', 'sclflag', 'parent_name', 'prop_name', 'is_nub', 'has_parent', 'children', 'co', 'rot', 'parent'])
 
@@ -467,7 +473,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         self.lbd_idx = max_lbd_idx + 1
 
     # BoneData整頓
-    def reorder_props(self, prefix):  # type: (str) -> None
+    def reorder_props(self, prefix: str) -> None:
         change_items = []
         item_count = 0
         prefix_pos = len(prefix)
@@ -489,7 +495,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
         change_items.clear()
 
     # no_use
-    def reorder_lbd(self):  # type: () -> None
+    def reorder_lbd(self) -> None:
         remove_items = []
         change_items = []
         item_count = 0
@@ -522,7 +528,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
 
     # 旧版の取り込みデータであるかの判定 (やっつけ)
     # return 1 => 旧版 (0 => 新版, -1 => 不明)
-    def check_oldmode(self):  # type: () -> int
+    def check_oldmode(self) -> int:
         bone1 = self.target_bones.get('Bip01')
         if bone1:
             if round(bone1.length - 1.0, 6) == 0:
@@ -573,20 +579,20 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                 bone_v = c0
                 r0 = bone_mat.to_quaternion()
                 if self.is_oldmode:
-                    r0 *= mathutils.Quaternion((0, 0, 1), math.radians(90))
+                    r0 = compat.mul(r0, mathutils.Quaternion((0, 0, 1), math.radians(90)))
                     r0.w, r0.x, r0.y, r0.z, = -r0.w, -r0.x, r0.z, -r0.y
                 else:
                     r1 = mathutils.Euler((0, 0, math.radians(-90)), 'XYZ').to_quaternion()
                     r2 = mathutils.Euler((math.radians(-90), 0, 0), 'XYZ').to_quaternion()
-                    r0 = r0 * r1 * r2
+                    r0 = compat.mul3(r0, r1, r2)
                     r0.w, r0.x, r0.y, r0.z = -r0.y, -r0.z, -r0.x, r0.w
                 bone_q = r0
             else:
                 parentbone_name = common.remove_serial_num(targetbone.parent.name)
-                # bone_mat = bone_d.parent.matrix_local.inverted() * bone_d.matrix_local
+                # bone_mat = bone_d.parent.matrix_local.inverted() @ bone_d.matrix_local
                 # bone_v = bone_mat.to_translation() / self.scale
                 # bone_q = bone_mat.to_quaternion()
-                bone_v = (bone_d.head_local - bone_d.parent.head_local) * bone_d.parent.matrix_local / self.scale
+                bone_v = compat.mul(bone_d.head_local - bone_d.parent.head_local, bone_d.parent.matrix_local) / self.scale
                 bone_q = bone_d.matrix.to_3x3().to_quaternion()
                 if self.is_oldmode:
                     bone_v.x, bone_v.y, bone_v.z = -bone_v.y, bone_v.z, bone_v.x
@@ -600,14 +606,16 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
             bdata1 = self.bd_dic.get(bone_name)
             if bdata1:
                 active_prop_name = bdata1.prop_name
-                sclflag = bdata1.sclflag
+                sclflag = bdata1.sclflag  # sclflagはBoneDataを優先
                 self.count_bd_update += 1
             else:
                 # not found bonedata. 新規追加BoneData
                 self.count_bd_add += 1
                 active_prop_name = "BoneData:" + str(self.bonedata_idx)
                 self.bonedata_idx += 1
-                sclflag = 0
+                sclflag = bone_d.get('UnknownFlag')
+                if sclflag is None:
+                    sclflag = 0
 
             string_bone = self.create_bonedata_string(bone_name, sclflag, parentbone_name, bone_v, bone_q, bdata1)
 
@@ -654,7 +662,7 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                             nub_bonename = nub_bonename[0:-4] + str(suf) + "_nub"
                             suf += 1
 
-                    bone_vt = (bone_d.tail_local - bone_d.head_local) * bone_d.matrix_local / self.scale
+                    bone_vt = compat.mul(bone_d.tail_local - bone_d.head_local, bone_d.matrix_local) / self.scale
                     bone_qt = bone_d.matrix.to_3x3().to_quaternion()
                     if self.is_oldmode:
                         bone_vt.x, bone_vt.y, bone_vt.z = -bone_vt.y, bone_vt.z, bone_vt.x
@@ -695,15 +703,17 @@ class CM3D2BoneDataImporter(bpy.types.Operator):  # type: ignore
                     rotate_first = mathutils.Matrix([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
 
                 mrbase = mathutils.Quaternion( (float(self.rotor[0]), float(self.rotor[1]), float(self.rotor[2]), float(self.rotor[3])) ).to_matrix()
-                mt = mathutils.Vector([bone_d.head_local.x, -bone_d.head_local.z, bone_d.head_local.y]) / self.scale * mrbase
+                v1 = mathutils.Vector([bone_d.head_local.x, -bone_d.head_local.z, bone_d.head_local.y]) / self.scale
+                mt = compat.mul(v1, mrbase)
 
-                localbone = mrbase.inverted() * rotate_first * qlb.to_matrix()
+                localbone = compat.mul3(mrbase.inverted(), rotate_first, qlb.to_matrix())
                 localbone.resize_4x4()
-                localbone = mathutils.Matrix([
+                matrix = mathutils.Matrix([
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
                     [0, 0, 1, 0],
-                    [mt.x + float(self.coor[0]), mt.y - float(self.coor[2]), mt.z + float(self.coor[1]), 1] ]) * localbone
+                    [mt.x + float(self.coor[0]), mt.y - float(self.coor[2]), mt.z + float(self.coor[1]), 1] ])
+                localbone = compat.mul(matrix, localbone)
 
                 string_localbone = "{0},{1:.17} {2:.17} {3:.17} {4:.17} {5:.17} {6:.17} {7:.17} {8:.17} {9:.17} {10:.17} {11:.17} {12:.17} {13:.17} {14:.17} {15:.17} {16:.17}".format(
                     bone_name,

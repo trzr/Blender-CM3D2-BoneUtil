@@ -1,29 +1,32 @@
 # -*- coding: utf-8 -*-
 
-import bpy  # type: ignore
+import bpy
 import os
 import struct
 import tempfile
 from . import common
-from typing import List, Set, Tuple, Dict, Optional, Iterator, Any
+from . import compatibility as compat
+from typing import List, Tuple, Dict, Optional, Iterator, Any
 
 
-def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
+def menu_func(self, context: bpy.types.Context) -> None:
     ob = context.active_object
     if not ob or ob.type != 'MESH' or ob.data.shape_keys is None:
         return
-    if not common.prefs().bsimp:
+    if not common.prefs().feature_importer:
         return
 
-    bsl = context.window_manager.blendset_list
+    bsl = context.scene.trzr_butl_blendsets
     box = self.layout.box()
     col = box.column()
-    split = col.split(percentage=0.14, align=True)
+    split = compat.layout_split(col, factor=0.14, align=True)
     if bsl.display_box:
-        split.prop(bsl, 'display_box', text="", icon='TRIA_DOWN')
+        split.prop(bsl, 'display_box', text='', icon='TRIA_DOWN')
     else:
-        split.prop(bsl, 'display_box', text="", icon='TRIA_RIGHT')
+        split.prop(bsl, 'display_box', text='', icon='TRIA_RIGHT')
+    split = compat.layout_split(split, factor=0.837, align=True)
     split.label(text="butl.shapekey.BatchOperation", icon='HAND')
+    split.operator(BUTL_OT_BlendsetsUpdater.bl_idname, text='', icon='FILE_REFRESH')
 
     if not bsl.display_box:
         return
@@ -32,18 +35,18 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
     sub_row1 = col.row(align=True)
     sub_row1.label(text='butl.shapekey.menuif')
     label = bpy.app.translations.pgettext('Import')
-    sub_row1.operator(CM3D2MenuImporter.bl_idname, icon='IMPORT', text=label)
+    sub_row1.operator(BUTL_OT_CM3D2MenuImporter.bl_idname, icon='IMPORT', text=label)
     label = bpy.app.translations.pgettext('Export')
-    sub_row1.operator(CM3D2MenuExporter.bl_idname, icon='EXPORT', text=label)
+    sub_row1.operator(BUTL_OT_CM3D2MenuExporter.bl_idname, icon='EXPORT', text=label)
 
     sub_row1 = col.row(align=True)
     sub_row1.label(text='butl.shapekey.BlendsetOpeation')
     label = bpy.app.translations.pgettext('butl.shapekey.CopySet')
-    sub_row1.operator(BlendsetsCopier.bl_idname, icon='COPYDOWN', text=label)
+    sub_row1.operator(BUTL_OT_BlendsetsCopier.bl_idname, icon='COPYDOWN', text=label)
     label = bpy.app.translations.pgettext('butl.shapekey.PasteSet')
-    sub_row1.operator(BlendsetsPaster.bl_idname, icon='PASTEDOWN', text=label)
+    sub_row1.operator(BUTL_OT_BlendsetsPaster.bl_idname, icon='PASTEDOWN', text=label)
     label = bpy.app.translations.pgettext('butl.shapekey.ClearSet')
-    sub_row1.operator(BlendsetsClearer.bl_idname, icon='X', text=label)
+    sub_row1.operator(BUTL_OT_BlendsetsClearer.bl_idname, icon='X', text=label)
 
     # has_target = False
     # for prop_key in ob.data.keys():
@@ -51,9 +54,9 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
     #         has_target = True
     #         break
     # if has_target:
-    refresh_list(self, context, bsl, ob.data)  # type: ignore
+    # refresh_list(context, bsl, ob.data)
 
-    split = col.split(percentage=0.1, align=True)
+    split = compat.layout_split(col, factor=0.1, align=True)
     if bsl.display_list:
         split.prop(bsl, "display_list", text="", icon='TRIA_DOWN')
     else:
@@ -69,7 +72,7 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
     if bsl.display_list:
         row = col.row(align=True)
         col1 = row.column(align=True)
-        col1.template_list("BlendsetList", "", bsl, "blendset_items", bsl, "item_idx", rows=2)
+        col1.template_list("BUTL_UL_BlendsetList", "", bsl, "blendset_items", bsl, "item_idx", rows=2)
 
         if bsl.item_idx != bsl.prev_idx:
             if 0 <= bsl.item_idx < bs_count:
@@ -79,43 +82,85 @@ def menu_func(self, context):  # type: (Any, bpy.types.Context) -> None
             bsl.prev_idx = bsl.item_idx
 
         row1 = col.row(align=True)
-        split1 = row1.split(percentage=0.6, align=True)
+        split1 = compat.layout_split(row1, factor=0.6, align=True)
         split1.prop(bsl, "target_name", text="")
         label = bpy.app.translations.pgettext('butl.shapekey.Reflect')
-        split1.operator(BlendsetReflector.bl_idname, icon='TRIA_DOWN', text=label)
+        split1.operator(BUTL_OT_BlendsetReflector.bl_idname, icon='TRIA_DOWN', text=label)
         label = bpy.app.translations.pgettext('butl.shapekey.Regist')
-        split1.operator(BlendsetRegister.bl_idname, icon='TRIA_UP', text=label)
+        split1.operator(BUTL_OT_BlendsetRegister.bl_idname, icon='TRIA_UP', text=label)
 
-        subsplit = split1.split(percentage=0.5, align=True)
-        subsplit.operator(BlendsetAdder.bl_idname, icon='ZOOMIN', text='')
-        subsplit.operator(BlendsetDeleter.bl_idname, icon='ZOOMOUT', text='')
+        subsplit = compat.layout_split(split1, factor=0.5, align=True)
+        subsplit.operator(BUTL_OT_BlendsetAdder.bl_idname, icon=compat.icon('ADD'), text='')
+        subsplit.operator(BUTL_OT_BlendsetDeleter.bl_idname, icon=compat.icon('REMOVE'), text='')
 
     # bottom
     col = col.column()
     row = col.row(align=True)
     row.label(text='butl.shapekey.ShapeKeyVal')
     label = bpy.app.translations.pgettext('butl.shapekey.CopyValue')
-    row.operator(BlendsetCopier.bl_idname, icon='COPYDOWN', text=label)
+    row.operator(BUTL_OT_BlendsetCopier.bl_idname, icon='COPYDOWN', text=label)
     label = bpy.app.translations.pgettext('butl.shapekey.PasteValue')
-    row.operator(BlendsetPaster.bl_idname, icon='PASTEDOWN', text=label)
+    row.operator(BUTL_OT_BlendsetPaster.bl_idname, icon='PASTEDOWN', text=label)
 
 
-def refresh_list(self, context, bs_list, target_props):  # type: (Any, bpy.types.Context, Any, Dict) -> None
-    bs_list.blendset_items.clear()
-    for propkey in target_props.keys():
-        if propkey.startswith('blendset:'):
-            item = bs_list.blendset_items.add()
-            item.name = propkey[9:]
+@compat.BlRegister(use_bl_attr=False)
+class BlendsetItem(bpy.types.PropertyGroup):
+    name = bpy.props.StringProperty()
+    selected = bpy.props.BoolProperty()
+
+@compat.BlRegister(use_bl_attr=False)
+class BUTL_UL_BlendsetList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.label(text=item.name, translate=False, icon='NONE')
 
 
-class BlendsetsPaster(bpy.types.Operator):  # type: ignore
+@compat.BlRegister(use_bl_attr=False)
+class Blendsets(bpy.types.PropertyGroup):
+    blendset_items = bpy.props.CollectionProperty(type=BlendsetItem)
+    item_idx = bpy.props.IntProperty()
+    prev_idx = bpy.props.IntProperty()
+    target_name = bpy.props.StringProperty()
+    display_list = bpy.props.BoolProperty(
+        name="Blendset List",
+        description="Display Blendset List",
+        default=False)
+
+    display_box = bpy.props.BoolProperty(
+        name="display_box",
+        description="",
+        default=False)
+
+# ========== Operator =====================================
+@compat.BlRegister()
+class BUTL_OT_BlendsetsUpdater(bpy.types.Operator):
+    bl_idname = 'shapekey.trzr_update_blendsets'
+    bl_label = "Refresh blendset list"
+
+    def execute(self, context: bpy.types.Context) -> set:
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
+        return {'FINISHED'}
+
+    @classmethod
+    def refresh_list(cls, context: bpy.types.Context) -> None:
+        bs_list = context.scene.trzr_butl_blendsets
+        target_props = context.active_object.data
+
+        bs_list.blendset_items.clear()
+        for propkey in target_props.keys():
+            if propkey.startswith('blendset:'):
+                item = bs_list.blendset_items.add()
+                item.name = propkey[9:]
+
+
+@compat.BlRegister()
+class BUTL_OT_BlendsetsPaster(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_paste_blendsets'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
             clipboard = context.window_manager.clipboard
@@ -123,7 +168,7 @@ class BlendsetsPaster(bpy.types.Operator):  # type: ignore
                 return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         ob = context.active_object
         props = ob.data
         # clear
@@ -178,17 +223,20 @@ class BlendsetsPaster(bpy.types.Operator):  # type: ignore
             kv_list.clear()
         msg = bpy.app.translations.pgettext('butl.shapekey.PasteBlendsets.Finished')
         self.report(type={'INFO'}, message=msg % set_item_count)
+
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
         return {'FINISHED'}
 
 
-class BlendsetsCopier(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetsCopier(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_copy_blendsets'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
             for prop_key in ob.data.keys():
@@ -196,7 +244,7 @@ class BlendsetsCopier(bpy.types.Operator):  # type: ignore
                     return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         output_text = ""
 
         ob = context.active_object
@@ -219,14 +267,15 @@ class BlendsetsCopier(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class BlendsetsClearer(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetsClearer(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_clear_blendsets'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
             for prop_key in ob.data.keys():
@@ -234,7 +283,7 @@ class BlendsetsClearer(bpy.types.Operator):  # type: ignore
                     return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         ob = context.active_object
         props = ob.data
 
@@ -244,26 +293,30 @@ class BlendsetsClearer(bpy.types.Operator):  # type: ignore
 
         msg = bpy.app.translations.pgettext('butl.shapekey.ClearBlendsets.Finished')
         self.report(type={'INFO'}, message=msg)
+
+        bs_list = context.scene.trzr_butl_blendsets
+        bs_list.blendset_items.clear()
         return {'FINISHED'}
 
 
-class BlendsetReflector(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetReflector(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_reflect_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.ReflectBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
-            bsl = context.window_manager.blendset_list
+            bsl = context.scene.trzr_butl_blendsets
             if bsl.target_name in bsl.blendset_items:
                 return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
-        bsl = context.window_manager.blendset_list
+    def execute(self, context: bpy.types.Context) -> set:
+        bsl = context.scene.trzr_butl_blendsets
         target_name = bsl.target_name
 
         ob = context.active_object
@@ -298,23 +351,24 @@ class BlendsetReflector(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class BlendsetRegister(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetRegister(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_regist_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
-            bsl = context.window_manager.blendset_list
+            bsl = context.scene.trzr_butl_blendsets
             if bsl.target_name in bsl.blendset_items:
                 return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
-        bsl = context.window_manager.blendset_list
+    def execute(self, context: bpy.types.Context) -> set:
+        bsl = context.scene.trzr_butl_blendsets
         target_name = bsl.target_name
 
         ob = context.active_object
@@ -329,26 +383,29 @@ class BlendsetRegister(bpy.types.Operator):  # type: ignore
 
         msg = bpy.app.translations.pgettext('butl.shapekey.RegistBlendset.Finished')
         self.report(type={'INFO'}, message=msg % target_name)
+
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
         return {'FINISHED'}
 
 
-class BlendsetAdder(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetAdder(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_add_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.AddBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.AddBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
-            bsl = context.window_manager.blendset_list
+            bsl = context.scene.trzr_butl_blendsets
             if len(bsl.target_name) > 0 and bsl.target_name not in bsl.blendset_items:
                 return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
-        bsl = context.window_manager.blendset_list
+    def execute(self, context: bpy.types.Context) -> set:
+        bsl = context.scene.trzr_butl_blendsets
         target_name = bsl.target_name
 
         ob = context.active_object
@@ -363,26 +420,29 @@ class BlendsetAdder(bpy.types.Operator):  # type: ignore
 
         msg = bpy.app.translations.pgettext('butl.shapekey.AddBlendset.Finished')
         self.report(type={'INFO'}, message=msg % target_name)
+
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
         return {'FINISHED'}
 
 
-class BlendsetDeleter(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetDeleter(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_del_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.DelBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.DelBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
-            bsl = context.window_manager.blendset_list
+            bsl = context.scene.trzr_butl_blendsets
             if len(bsl.target_name) > 0 and bsl.target_name in bsl.blendset_items:
                 return True
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
-        bsl = context.window_manager.blendset_list
+    def execute(self, context: bpy.types.Context) -> set:
+        bsl = context.scene.trzr_butl_blendsets
         target_name = bsl.target_name
 
         ob = context.active_object
@@ -390,17 +450,20 @@ class BlendsetDeleter(bpy.types.Operator):  # type: ignore
 
         msg = bpy.app.translations.pgettext('butl.shapekey.DelBlendset.Finished') % target_name
         self.report(type={'INFO'}, message=msg)
+
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
         return {'FINISHED'}
 
 
-class BlendsetPaster(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetPaster(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_paste_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.PasteBlendset.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         data = context.window_manager.clipboard
         if 'blendset' in data:
             return False
@@ -410,7 +473,7 @@ class BlendsetPaster(bpy.types.Operator):  # type: ignore
 
         return True
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         data = context.window_manager.clipboard
         lines = data.split('\n')
 
@@ -450,14 +513,15 @@ class BlendsetPaster(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class BlendsetCopier(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_BlendsetCopier(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_copy_blendset'
     bl_label = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets')
     bl_description = bpy.app.translations.pgettext('butl.shapekey.CopyBlendsets.Desc')
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob is None:
             return False
@@ -467,7 +531,7 @@ class BlendsetCopier(bpy.types.Operator):  # type: ignore
             return False
         return True
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         ob = context.active_object
         key_blocks = ob.data.shape_keys.key_blocks
         output_text = ""
@@ -483,24 +547,25 @@ class BlendsetCopier(bpy.types.Operator):  # type: ignore
         return {'FINISHED'}
 
 
-class CM3D2MenuImporter(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_CM3D2MenuImporter(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_import_cm3d2_menu'
     bl_label = 'import menu file'
     bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ImportfileDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath = bpy.props.StringProperty(subtype='FILE_PATH')
-    filename_ext = ".menu"
-    filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
+    filepath: bpy.props.StringProperty = bpy.props.StringProperty(subtype='FILE_PATH')
+    filename_ext = '.menu'
+    filter_glob: bpy.props.StringProperty = bpy.props.StringProperty(default='*.menu', options={'HIDDEN'})
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
             return True
         return False
 
-    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
+    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> set
         prefs = common.prefs()
         if prefs.menu_import_path:
             self.filepath = prefs.menu_import_path
@@ -510,7 +575,7 @@ class CM3D2MenuImporter(bpy.types.Operator):  # type: ignore
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         common.prefs().menu_import_path = self.filepath
 
         ob = context.active_object
@@ -600,29 +665,32 @@ class CM3D2MenuImporter(bpy.types.Operator):  # type: ignore
 
         msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsImport.Finished')
         self.report(type={'INFO'}, message=msg % set_item_count)
+
+        BUTL_OT_BlendsetsUpdater.refresh_list(context)
         return {'FINISHED'}
 
 
-class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
+@compat.BlRegister()
+class BUTL_OT_CM3D2MenuExporter(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_export_cm3d2_menu'
     bl_label = "export to menu"
     bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ExportfileDesc')
 
-    filepath = bpy.props.StringProperty(subtype='FILE_PATH')
+    filepath: bpy.props.StringProperty = bpy.props.StringProperty(subtype='FILE_PATH')
+    filter_glob: bpy.props.StringProperty = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
     filename_ext = ".menu"
-    filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
 
-    is_backup = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
-    savefile = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
+    is_backup: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
+    savefile: bpy.props.StringProperty = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob and ob.type == 'MESH':
             return True
         return False
 
-    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
+    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> set
         ob = context.active_object
         props = ob.data
         self.filepath = ''
@@ -640,12 +708,12 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-    def draw(self, context):  # type: (bpy.types.Context) -> None
+    def draw(self, context: bpy.types.Context) -> None:
         self.layout.prop(self, 'is_backup', icon='FILE_BACKUP')
-        self.layout.prop(self, 'savefile', icon='NEW')
+        self.layout.prop(self, 'savefile', icon=compat.icon('FILE_NEW'))
         self.layout.label(text="butl.shapekey.Menu.Overwrite")  # , icon='LAMP')
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         common.prefs().menu_export_path = self.filepath
 
         filename = os.path.basename(self.filepath)
@@ -750,7 +818,7 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
             os.remove(outfilepath)
         os.rename(temp_filepath, outfilepath)
 
-        msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsExport.Finished') % self.filepath
+        msg = bpy.app.translations.pgettext('butl.shapekey.Menu.BlendsetsExport.Finished') % outfilepath
         self.report(type={'INFO'}, message=msg)
         return {'FINISHED'}
 
@@ -771,42 +839,3 @@ class CM3D2MenuExporter(bpy.types.Operator):  # type: ignore
                     if len(entry) >= 2:
                         common.append_str(ba, entry[0])
                         common.append_str(ba, entry[1])
-
-
-class BlendsetItem(bpy.types.PropertyGroup):  # type: ignore
-    name = bpy.props.StringProperty()
-    selected = bpy.props.BoolProperty()
-
-
-class BlendsetList(bpy.types.UIList):  # type: ignore
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):  # type: ignore
-        layout.label(text=item.name, translate=False, icon='NONE')
-
-
-class Blendsets(bpy.types.PropertyGroup):  # type: ignore
-    blendset_items = bpy.props.CollectionProperty(type=BlendsetItem)
-    item_idx = bpy.props.IntProperty()
-    prev_idx = bpy.props.IntProperty()
-    target_name = bpy.props.StringProperty()
-    display_list = bpy.props.BoolProperty(
-        name="Blendset List",
-        description="Display Blendset List",
-        default=False)
-
-    display_box = bpy.props.BoolProperty(
-        name="display_box",
-        description="",
-        default=False)
-
-
-# -------------------------------------------------------------------
-# register
-# -------------------------------------------------------------------
-def register():  # type: () -> None
-    """Register function."""
-    bpy.types.WindowManager.blendset_list = bpy.props.PointerProperty(type=Blendsets)
-
-
-def unregister():  # type: () -> None
-    """Unregister function."""
-    del bpy.types.WindowManager.blendset_list

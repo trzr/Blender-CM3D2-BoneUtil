@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import bpy  # type: ignore
-import bmesh  # type: ignore
+import bpy
+import bmesh
+import mathutils
 import math
-import mathutils  # type: ignore
 import os
 import re
 import sys
 from . import common
+from . import compatibility as compat
 from typing import List, Any, Match, Set
 
 
-def menu_func_specials(self, context):  # type: (Any, bpy.types.Context) -> None
-    if not common.prefs().vgfeature:
+def menu_func_specials(self, context: bpy.types.Context) -> None:
+    if not common.prefs().feature_vgroups:
         return
     ob = context.active_object
     if ob is None or ob.type != 'MESH':
@@ -25,29 +26,32 @@ def menu_func_specials(self, context):  # type: (Any, bpy.types.Context) -> None
             return
 
     self.layout.separator()
-    self.layout.operator(Bone2VertexGroup.bl_idname, icon='BONE_DATA')
+    self.layout.operator(BUTL_OT_Bone2VertexGroup.bl_idname, icon='BONE_DATA')
 
 
-class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
-    bl_idname = 'object.trzr_bone_to_vertex_group'
-    bl_label = "ボーン情報から取り込み"
-    bl_description = "ボーン情報から頂点グループを作成します"
+@compat.BlRegister()
+class BUTL_OT_Bone2VertexGroup(bpy.types.Operator):
+    """ボーン情報を元に頂点グループを作成するオペレータ"""
+
+    bl_idname = 'object.trzr_bone_ot_vertex_group'
+    bl_label = "butl.vgroups.ImportLabel"
+    bl_description = "butl.vgroups.ImportDesc"
     bl_options = {'REGISTER', 'UNDO'}
 
-    skip_nub = bpy.props.BoolProperty(name="nubボーン スキップ", default=True, description="末端ボーンをスキップ")
-    skip_shapekeys = bpy.props.BoolProperty(name="シェイプキーと同名をスキップ", default=True, description="シェイプキーと同名のボーンをスキップ")
+    skip_nub: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.vgroups.SkipNub", default=True, description="末端ボーンをスキップ")
+    skip_shapekeys: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.vgroups.SkipShapeKeyName", default=True, description="シェイプキーと同名のボーンをスキップ")
 
-    src_data = bpy.props.EnumProperty(
+    src_data: bpy.props.EnumProperty = bpy.props.EnumProperty(
         name="Source",
         items=[
-            ('Selected', '選択ボーン', "選択されたボーンのみ", 'NONE', 0),
-            ('All', '全ボーン', "blender上のボーン", 'NONE', 1),
-            ('LocalBoneData', 'LocalBoneData', "property上のLocalBoneData", 'NONE', 2),
+            ('Selected', 'butl.EnumSelected', "butl.EnumDescSelected", 'NONE', 0),
+            ('All', 'butl.EnumAll', "butl.EnumDescDescendant", 'NONE', 1),
+            ('LocalBoneData', 'LocalBoneData', "butl.EnumDescLocalBoneData", 'NONE', 2),
         ],
         default='All')
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         ob = context.active_object
         if ob:
             if 'BaseBone' in ob:
@@ -60,23 +64,23 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
                         return True
         return False
 
-    def invoke(self, context, event):  # type: (bpy.types.Context, Any) -> Set
+    def invoke(self, context: bpy.types.Context, event: Any) -> set:
         return context.window_manager.invoke_props_dialog(self)
 
-    def draw(self, context):  # type: (bpy.types.Context) -> None
+    def draw(self, context: bpy.types.Context):  # type: () -> None
         row = self.layout.row()
-        row.label(text="データソース:", icon='BONE_DATA')
+        row.label(text="butl.DataSource:", icon='BONE_DATA')
         row = self.layout.row()
         row.prop(self, 'src_data', icon='BONE_DATA', expand=True)
         row = self.layout.row()
-        row.label(text="スキップ設定:", icon='FILTER')
+        row.label(text="butl.FilterConfig:", icon='FILTER')
         row = self.layout.row()
         row.prop(self, 'skip_nub', icon='GROUP_BONE')
         row = self.layout.row()
         row.prop(self, 'skip_shapekeys', icon='SHAPEKEY_DATA')
         # TODO armatureのBaseBoneかmeshのBaseBoneかを選択？
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
+    def execute(self, context: bpy.types.Context) -> set:
         ob = context.active_object
         arm = ob.parent
 
@@ -106,7 +110,7 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
                     target_bonenames.append(key)
 
         if len(target_bonenames) == 0:
-            self.report(type={'INFO'}, message="抽出元のボーン情報がありません。中断します")
+            self.report(type={'INFO'}, message="butl.vgroups.NotFoundSourceBone")
             return {'CANCELLED'}
 
         ignores = None
@@ -134,9 +138,9 @@ class Bone2VertexGroup(bpy.types.Operator):  # type: ignore
             created += 1
 
         if created > 0:
-            msg = "ボーンから頂点グループを作成しました. created=%d" % created
+            msg = bpy.app.translations.pgettext('butl.vgroups.VertexGroupCreated') % created
         else:
-            msg = "頂点グループはすべて作成済みです"
+            msg = bpy.app.translations.pgettext('butl.vgroups.VertexGroupAlreadyExist')
 
         self.report(type={'INFO'}, message=msg)
         return {'FINISHED'}

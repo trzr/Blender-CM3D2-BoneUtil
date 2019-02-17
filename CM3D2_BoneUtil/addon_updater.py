@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
 
-import bpy  # type: ignore
-import datetime
+import bpy
 import json
 import os
-import urllib
 import urllib.request
 import zipfile
+import datetime
 # from urllib.error import URLError, HTTPError
 from . import common
-from typing import List, Set, Optional, Any
+from . import compatibility as compat
+from typing import List, Tuple, Set, Optional, Any
 
 
-class CM3D2BoneUtilUpdater(bpy.types.Operator):  # type: ignore
-    """addon updator."""
+@compat.BlRegister()
+class BUTL_OT_Updater(bpy.types.Operator):
+    """Addon Updater."""
 
-    bl_idname = 'script.trzr_update_cm3d2_boneutil'
+    bl_idname = 'trzr.boneutil_ot_updater'
     bl_label = 'Update'
     bl_description = bpy.app.translations.pgettext('butl.updater.Desc')
     bl_options = {'REGISTER'}
 
     @classmethod
-    def poll(cls, context):  # type: (bpy.types.Context) -> bool
+    def poll(cls, context: bpy.types.Context) -> bool:
         hist = common.prefs().update_history
         if len(hist.updates) > 0:
             if hist.has_update():
@@ -29,30 +30,31 @@ class CM3D2BoneUtilUpdater(bpy.types.Operator):  # type: ignore
 
         return False
 
-    def execute(self, context):  # type: (bpy.types.Context) -> Set
-        hist = common.prefs().update_history
+    def execute(self, context: bpy.types.Context) -> set:
+        prefs = common.prefs
+        hist = prefs.update_history
         # version = hist.titles[0]
 
-        zip_path = os.path.join(bpy.app.tempdir, "Blender-CM3D2-BoneUtil-master.zip")
+        zip_path = os.path.join(bpy.app.tempdir, 'Blender-CM3D2-BoneUtil-master.zip')
         addon_path = os.path.dirname(__file__)
 
         url = hist.links[0][1]
         response = urllib.request.urlopen(url)
-        with open(zip_path, "wb") as zip_writer:
+        with open(zip_path, 'wb') as zip_writer:
             zip_writer.write(response.read())
 
-        with zipfile.ZipFile(zip_path, "r") as zip_reader:
+        with zipfile.ZipFile(zip_path, 'r') as zip_reader:
             for path in zip_reader.namelist():
                 if not os.path.basename(path):
                     continue
                 sub_dir = os.path.split( os.path.split(path)[0] )[1]
-                if sub_dir == "CM3D2 BoneUtil":
+                if sub_dir == 'CM3D2_BoneUtil':
                     with open(os.path.join(addon_path, os.path.basename(path)), 'wb') as file:
                         file.write(zip_reader.read(path))
 
         hist.now_ver = hist.latest_ver
         ver = '.'.join([ str(v) for v in hist.now_ver ])
-        common.prefs().version = ver
+        prefs.version = ver
         self.report(type={'INFO'}, message=bpy.app.translations.pgettext('butl.updater.Finished') % ver)
         try:
             bpy.ops.wm.addon_disable(module=__name__)
@@ -66,18 +68,18 @@ class CM3D2BoneUtilUpdater(bpy.types.Operator):  # type: ignore
 class VersionHistory:
     url = 'https://api.github.com/repos/trzr/Blender-CM3D2-BoneUtil/releases'
 
-    def __init__(self):  # type: () -> None
+    def __init__(self, ver: Tuple) -> None:
         self.updated_time = None  # type: Optional[datetime.datetime]
-        self.vers = []  # type: List
-        self.titles = []  # type: List
-        self.updates = []  # type: List
-        self.links = []  # type: List
+        self.vers: List = []  # type: List
+        self.titles: List = []  # type: List
+        self.updates: List = []  # type: List
+        self.links: List = []  # type: List
         # last_ver_date = None
-        self.now_ver = []  # type: List
-        self.latest_ver = []  # type: List
-        self.latest_version = ''
+        self.now_ver: Tuple = ver  # type: Tuple
+        self.latest_ver: List = []  # type: List
+        self.latest_version: str = ''
 
-    def update(self, now):  # type: (datetime.datetime) -> None
+    def update(self, now: datetime.datetime) -> None:
         res = urllib.request.urlopen(VersionHistory.url)
         json_data = json.loads(res.read().decode('utf-8'))
 
@@ -90,22 +92,18 @@ class VersionHistory:
             if rel['prerelease']:
                 continue
             ver = rel['tag_name']
-            assets = rel['assets']
-            body = rel['body'].split("\n", 1)[0].strip()
+            body = rel['body'].split('\n', 1)[0].strip()
             if len(body) >= 64:
                 body = body[0:63]
-            title = ver + " " + body
+            title = ver + ' ' + body
 
-            if len(assets) > 0 and 'browser_download_url' in assets[0]:
-                dl_link = assets[0]['browser_download_url']
-            else:
-                dl_link = rel['zipball_url']
+            dl_link = self.get_dl_link(rel)
             link = (rel['html_url'], dl_link)
             update = rel['created_at']
             if len(update) < 19:
                 continue
 
-            updates.append( datetime.datetime.strptime(update[0:19], '%Y-%m-%dT%H:%M:%S') )
+            updates.append( datetime.strptime(update[0:19], '%Y-%m-%dT%H:%M:%S') )
             vers.append(ver)
             titles.append(title)
             links.append(link)
@@ -124,9 +122,18 @@ class VersionHistory:
 
         if len(self.now_ver) == 0:
             ver = common.prefs().version
-            self.now_ver = [ int(v) for v in ver.split('.') ]
+            self.now_ver = ( int(v) for v in ver.split('.') )
 
-    def has_update(self):  # type: () -> bool
+    def get_dl_link(self, rel: dict) -> str:
+        assets = rel['assets']
+        if len(assets) > 0:
+            dl_link = assets[0].get('browser_download_url')
+            if dl_link:
+                return dl_link
+
+        return rel['zipball_url']
+
+    def has_update(self) -> bool:
         if len(self.now_ver) == len(self.latest_ver):
             for now, latest in zip(self.now_ver, self.latest_ver):
                 if now == latest:
@@ -138,13 +145,14 @@ class VersionHistory:
         return False
 
 
-class CM3D2BoneUtilHistory(bpy.types.Menu):  # type: ignore
+@compat.BlRegister()
+class BUTL_MT_History(bpy.types.Menu):
     """更新履歴メニュー."""
 
-    bl_idname = 'INFO_MT_CM3D2_BoneUtil_history'
+    bl_idname = 'trzr.boneutil_mt_history'
     bl_label = bpy.app.translations.pgettext('butl.updater.History')
 
-    def draw(self, context):  # type: (bpy.types.Context) -> None
+    def draw(self, context: bpy.types.Context) -> None:
         diff_seconds = 1000
 
         hist = common.prefs().update_history
@@ -183,7 +191,7 @@ class CM3D2BoneUtilHistory(bpy.types.Menu):  # type: ignore
             else:
                 date_str = bpy.app.translations.pgettext('butl.updater.HistorySecs') % diff_date.seconds
 
-            text = "(" + date_str + ") " + title
+            text = '(' + date_str + ') ' + title
             self.layout.operator('wm.url_open', text=text, icon=icon).url = link[0]
             count += 1
 
