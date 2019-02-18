@@ -149,6 +149,7 @@ legacy_icons['REMOVE'] = 'ZOOMOUT'
 legacy_icons['ARROW_LEFTRIGHT'] = 'MAN_SCALE'
 legacy_icons['FILE_FOLDER'] = 'FILESEL'
 legacy_icons['FILE_NEW'] = 'NEW'
+legacy_icons['FILEBROWSER'] = 'FILESEL'
 
 def icon(key):
     if IS_LEGACY:

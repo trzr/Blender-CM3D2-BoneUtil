@@ -38,10 +38,10 @@ class BUTL_OT_Bone2VertexGroup(bpy.types.Operator):
     bl_description = "butl.vgroups.ImportDesc"
     bl_options = {'REGISTER', 'UNDO'}
 
-    skip_nub: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.vgroups.SkipNub", default=True, description="末端ボーンをスキップ")
-    skip_shapekeys: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.vgroups.SkipShapeKeyName", default=True, description="シェイプキーと同名のボーンをスキップ")
+    skip_nub = bpy.props.BoolProperty(name="butl.vgroups.SkipNub", default=True, description="butl.vgroups.SkipNubDesc")
+    skip_shapekeys = bpy.props.BoolProperty(name="butl.vgroups.SkipShapeKeyName", default=True, description="butl.vgroups.SkipShapeKeyNameDesc")
 
-    src_data: bpy.props.EnumProperty = bpy.props.EnumProperty(
+    src_data = bpy.props.EnumProperty(
         name="Source",
         items=[
             ('Selected', 'butl.EnumSelected', "butl.EnumDescSelected", 'NONE', 0),

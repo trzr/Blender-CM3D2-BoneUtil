@@ -11,7 +11,7 @@ from typing import Any, Optional
 class PrefsHolder:
     prefs = None
 
-def get_preferences(context: bpy.types.Context) -> bpy.types.Preferences:
+def get_preferences(context):  # type: (bpy.types.Context) -> bpy.types.Preferences
     if compat.IS_LEGACY:
     # if hasattr(context, 'user_preferences'):
         return context.user_preferences

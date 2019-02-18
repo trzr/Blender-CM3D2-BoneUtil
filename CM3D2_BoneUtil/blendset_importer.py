@@ -554,9 +554,9 @@ class BUTL_OT_CM3D2MenuImporter(bpy.types.Operator):
     bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ImportfileDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath: bpy.props.StringProperty = bpy.props.StringProperty(subtype='FILE_PATH')
+    filepath = bpy.props.StringProperty(subtype='FILE_PATH')
     filename_ext = '.menu'
-    filter_glob: bpy.props.StringProperty = bpy.props.StringProperty(default='*.menu', options={'HIDDEN'})
+    filter_glob = bpy.props.StringProperty(default='*.menu', options={'HIDDEN'})
 
     @classmethod
     def poll(cls, context: bpy.types.Context) -> bool:
@@ -676,12 +676,12 @@ class BUTL_OT_CM3D2MenuExporter(bpy.types.Operator):
     bl_label = "export to menu"
     bl_description = bpy.app.translations.pgettext('butl.shapekey.Menu.ExportfileDesc')
 
-    filepath: bpy.props.StringProperty = bpy.props.StringProperty(subtype='FILE_PATH')
-    filter_glob: bpy.props.StringProperty = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
+    filepath = bpy.props.StringProperty(subtype='FILE_PATH')
+    filter_glob = bpy.props.StringProperty(default="*.menu", options={'HIDDEN'})
     filename_ext = ".menu"
 
-    is_backup: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
-    savefile: bpy.props.StringProperty = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
+    is_backup = bpy.props.BoolProperty(name="butl.shapekey.Menu.Backup", default=True, description="butl.shapekey.Menu.BackupDesc")
+    savefile = bpy.props.StringProperty(name="butl.shapekey.Menu.SaveFilename", default='', description="butl.shapekey.Menu.SaveFilenameDesc")
 
     @classmethod
     def poll(cls, context: bpy.types.Context) -> bool:

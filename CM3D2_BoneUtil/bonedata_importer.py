@@ -50,8 +50,8 @@ class BUTL_OT_BaseBoneRenamer(bpy.types.Operator):
     bl_description = bpy.app.translations.pgettext('butl.bdimport.RenameBaseBoneDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
-    bb_name: bpy.props.StringProperty = bpy.props.StringProperty(name="butl.BaseBoneName")
-    change_bonename: bpy.props.BoolProperty = bpy.props.BoolProperty(name="butl.RenameBone", default=False)
+    bb_name = bpy.props.StringProperty(name="butl.BaseBoneName")
+    change_bonename = bpy.props.BoolProperty(name="butl.RenameBone", default=False)
 
     def __init__(self):  # type: () -> None
         self.bb_name_old = None  # type: Optional[str]
@@ -151,7 +151,7 @@ class BoneData1(object):
         self.sclflag = sclflag
         self.parent_name = parent_name
         self.has_parent = (parent_name != "None")
-        self.children: List = []
+        self.children = []  # type: List
         self.co = ''
         self.rot = ''
         self.scale = None

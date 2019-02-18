@@ -1,7 +1,7 @@
 __author__ = "trzr"
 __status__ = "develop"
 __version__ = "0.4.0"
-__date__ = "17 Feb 2019"  # ctrl+shift+I
+__date__ = "18 Feb 2019"  # ctrl+shift+I
 
 bl_info = {
     "name": "CM3D2 BoneUtil",
@@ -78,24 +78,25 @@ import bpy
 
 
 # アドオン設定
+@compatibility.BlRegister()
 class BUTL_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    feature_bonetype: bpy.props.BoolProperty(name="butl.feature.ChangeBoneType", description="butl.feature.ChangeBoneTypeDesc", default=False)
-    feature_importer: bpy.props.BoolProperty(name="butl.feature.BsImporter", description="butl.feature.BsImporterDesc", default=True)
-    feature_vgroups: bpy.props.BoolProperty(name="butl.feature.Vertexgroups", description="butl.feature.VertexgroupsDesc", default=False)
+    feature_bonetype = bpy.props.BoolProperty(name="butl.feature.ChangeBoneType", description="butl.feature.ChangeBoneTypeDesc", default=False)
+    feature_importer = bpy.props.BoolProperty(name="butl.feature.BsImporter", description="butl.feature.BsImporterDesc", default=True)
+    feature_vgroups = bpy.props.BoolProperty(name="butl.feature.Vertexgroups", description="butl.feature.VertexgroupsDesc", default=False)
 
-    backup_ext: bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt",
+    backup_ext = bpy.props.StringProperty(name="butl.shapekey.Menu.BackupExt",
                                           description="butl.shapekey.Menu.BackupExtDesc", default='bak')
-    menu_default_path: bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
+    menu_default_path = bpy.props.StringProperty(name="butl.shapekey.Menu.TargetDir", subtype='DIR_PATH',
                                                  description="butl.shapekey.Menu.TargetDirDesc")
-    menu_import_path: bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
+    menu_import_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Import", subtype='FILE_PATH',
                                                 description="butl.shapekey.Menu.DefaultPath.ImportDesc")
-    menu_export_path: bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH',
+    menu_export_path = bpy.props.StringProperty(name="butl.shapekey.Menu.DefaultPath.Export", subtype='FILE_PATH',
                                                 description="butl.shapekey.Menu.DefaultPath.ExportDesc")
 
     update_history = addon_updater.VersionHistory(bl_info['version'])
-    version = '.'.join([str(v) for v in bl_info['version']])  # type: ignore
+    version = '.'.join([str(v) for v in bl_info['version']])
 
     def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
@@ -111,7 +112,7 @@ class BUTL_AddonPreferences(bpy.types.AddonPreferences):
         box = layout.box()
         box.prop(self, 'backup_ext', icon='FILE_BACKUP')
         box.label(text="butl.shapekey.Menu.File", icon='FILE_IMAGE')
-        box.prop(self, 'menu_default_path', icon=compatibility.icon('FILE_FOLDER'), text="butl.shapekey.Menu.InitFolder")
+        box.prop(self, 'menu_default_path', icon=compatibility.icon('FILEBROWSER'), text="butl.shapekey.Menu.InitFolder")
 
 
         row = layout.row()
@@ -125,17 +126,9 @@ class BUTL_AddonPreferences(bpy.types.AddonPreferences):
         row.operator(addon_updater.BUTL_OT_Updater.bl_idname, icon='FILE_REFRESH')
 
 
-classes = (
-    BUTL_AddonPreferences,
-)
-
-
 def register():
     bpy.app.translations.register(__name__, translations.get_dic())
 
-    # register classes
-    for cls in classes:
-        bpy.utils.register_class(cls)
     compatibility.BlRegister.register()
 
     # append menu
@@ -174,8 +167,6 @@ def unregister():
 
     # unregister classes
     compatibility.BlRegister.unregister()
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
 
     bpy.app.translations.unregister(__name__)
 

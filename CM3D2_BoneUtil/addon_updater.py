@@ -31,7 +31,7 @@ class BUTL_OT_Updater(bpy.types.Operator):
         return False
 
     def execute(self, context: bpy.types.Context) -> set:
-        prefs = common.prefs
+        prefs = common.prefs()
         hist = prefs.update_history
         # version = hist.titles[0]
 
@@ -70,14 +70,14 @@ class VersionHistory:
 
     def __init__(self, ver: Tuple) -> None:
         self.updated_time = None  # type: Optional[datetime]
-        self.vers: List = []
-        self.titles: List = []
-        self.updates: List = []
-        self.links: List = []
+        self.vers = []  # type: list
+        self.titles = []  # type: list
+        self.updates = []  # type: list
+        self.links = []  # type: list
         # last_ver_date = None
-        self.now_ver: Tuple = ver
-        self.latest_ver: list = []
-        self.latest_version: str = ''
+        self.now_ver = ver  # type: tuple
+        self.latest_ver = []  # type: list
+        self.latest_version = ''  # type: str
 
     def update(self, now: datetime) -> None:
         res = urllib.request.urlopen(VersionHistory.url)
