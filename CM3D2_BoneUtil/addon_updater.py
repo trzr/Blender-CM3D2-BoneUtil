@@ -18,7 +18,7 @@ class BUTL_OT_Updater(bpy.types.Operator):
 
     bl_idname = 'trzr.boneutil_ot_updater'
     bl_label = 'Update'
-    bl_description = bpy.app.translations.pgettext('butl.updater.Desc')
+    bl_description = common.trans_text('butl.updater.Desc')
     bl_options = {'REGISTER'}
 
     @classmethod
@@ -61,7 +61,7 @@ class BUTL_OT_Updater(bpy.types.Operator):
             bpy.ops.wm.addon_enable(module=__name__)
         except:
             pass
-        # TODO reload scripts
+
         return {'FINISHED'}
 
 

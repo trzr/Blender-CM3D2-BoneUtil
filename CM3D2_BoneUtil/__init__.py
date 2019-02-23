@@ -1,7 +1,7 @@
 __author__ = "trzr"
-__status__ = "develop"
+__status__ = "dev"
 __version__ = "0.4.0"
-__date__ = "18 Feb 2019"  # ctrl+shift+I
+__date__ = "23 Feb 2019"  # ctrl+shift+I
 
 bl_info = {
     "name": "CM3D2 BoneUtil",
@@ -18,32 +18,9 @@ bl_info = {
 
 
 # サブスクリプト群をインポート
-# import importlib
-# import sys
-# import bpy
-# subfiles = [
-#     'translations',
-#     'common',
-#     'compatibility',
-
-#     'addon_updater',
-#     'bonedata_importer',
-#     'bonetype_renamer',
-
-#     'blendset_importer',
-#     'vertex_group_tools',
-#     'selection_tool',
-# ]
-
-# for name in subfiles:
-#     fullname = '{}.{}'.format(__package__, name)
-#     if fullname in sys.modules:
-#         importlib.reload(sys.modules[fullname])
-#     else:
-#         importlib.import_module(fullname)
-
 if 'bpy' not in locals():
     from . import translations
+
     from . import common
     from . import compatibility
 
@@ -75,7 +52,6 @@ else:
     importlib.reload(selection_tool)
 
 import bpy
-
 
 # アドオン設定
 @compatibility.BlRegister()
@@ -127,8 +103,7 @@ class BUTL_AddonPreferences(bpy.types.AddonPreferences):
 
 
 def register():
-    bpy.app.translations.register(__name__, translations.get_dic())
-
+    common.TransManager.register()
     compatibility.BlRegister.register()
 
     # append menu
@@ -167,8 +142,7 @@ def unregister():
 
     # unregister classes
     compatibility.BlRegister.unregister()
-
-    bpy.app.translations.unregister(__name__)
+    common.TransManager.unregister()
 
 
 if __name__ == '__main__':

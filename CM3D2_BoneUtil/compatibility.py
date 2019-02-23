@@ -44,7 +44,16 @@ class BlRegister:
     @classmethod
     def register(cls):
         for cls1 in cls.classes:
+            # cls.translate_label(cls1)
             bpy.utils.register_class(cls1)
+
+    @classmethod
+    def translate_label(cls, cls1):
+        # 翻訳されていないbl_labelを翻訳済みテキストに変換
+        if hasattr(cls1, 'bl_label'):
+            label_text = cls1.bl_label
+            if label_text.startswith('butl.'):
+                setattr(cls, 'bl_label', bpy.app.translations.pgettext(label_text))
 
     @classmethod
     def unregister(cls):

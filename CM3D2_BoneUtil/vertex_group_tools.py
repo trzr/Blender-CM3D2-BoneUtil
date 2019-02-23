@@ -34,8 +34,8 @@ class BUTL_OT_Bone2VertexGroup(bpy.types.Operator):
     """ボーン情報を元に頂点グループを作成するオペレータ"""
 
     bl_idname = 'object.trzr_bone_ot_vertex_group'
-    bl_label = "butl.vgroups.ImportLabel"
-    bl_description = "butl.vgroups.ImportDesc"
+    bl_label = common.trans_text('butl.vgroups.ImportLabel')
+    bl_description = common.trans_text('butl.vgroups.ImportDesc')
     bl_options = {'REGISTER', 'UNDO'}
 
     skip_nub = bpy.props.BoolProperty(name="butl.vgroups.SkipNub", default=True, description="butl.vgroups.SkipNubDesc")
@@ -45,7 +45,7 @@ class BUTL_OT_Bone2VertexGroup(bpy.types.Operator):
         name="Source",
         items=[
             ('Selected', 'butl.EnumSelected', "butl.EnumDescSelected", 'NONE', 0),
-            ('All', 'butl.EnumAll', "butl.EnumDescDescendant", 'NONE', 1),
+            ('All', 'butl.EnumAll', "butl.EnumDescAll", 'NONE', 1),
             ('LocalBoneData', 'LocalBoneData', "butl.EnumDescLocalBoneData", 'NONE', 2),
         ],
         default='All')

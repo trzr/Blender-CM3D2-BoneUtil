@@ -4,12 +4,10 @@ import bpy
 import re
 import struct
 from . import compatibility as compat
+from . import translations
 from typing import Any, Optional
 
 # pt_includeNum = re.compile('.*([01[1-9]|2[0-4]).*')
-
-class PrefsHolder:
-    prefs = None
 
 def get_preferences(context):  # type: (bpy.types.Context) -> bpy.types.Preferences
     if compat.IS_LEGACY:
@@ -18,12 +16,41 @@ def get_preferences(context):  # type: (bpy.types.Context) -> bpy.types.Preferen
 
     return context.preferences
 
+class PrefsHolder:
+    prefs = None
+
 # このアドオンの設定値群を呼び出す
 def prefs():  # -> BUTL_AddonPreferences:
     if PrefsHolder.prefs is None:
         PrefsHolder.prefs = get_preferences(bpy.context).addons[__package__].preferences
 
     return PrefsHolder.prefs
+
+
+class TransManager:
+    registered = False
+
+    @classmethod
+    def trans_text(cls, key):
+        if not cls.registered:
+            cls.register()
+
+        return bpy.app.translations.pgettext(key)
+
+    @classmethod
+    def register(cls):
+        bpy.app.translations.unregister(__package__)
+        bpy.app.translations.register(__package__, translations.get_dic())
+        cls.registered = True
+
+    @classmethod
+    def unregister(cls):
+        if cls.registered:
+            bpy.app.translations.unregister(__package__)
+            cls.registered = False
+
+def trans_text(key):
+    return TransManager.trans_text(key)
 
 
 # データ名末尾の「.001」などを削除
