@@ -74,6 +74,14 @@ def make_annotations(cls):
     for k, v in cls_props.items():
         annos[k] = v
         delattr(cls, k)
+
+    # 親クラスを辿ってアノテーションを生成
+    for bc in cls.__bases__:
+        # bpyのタイプやbuiltinsの場合はスキップ
+        if bc.__module__ in ['bpy_types', 'builtins']:
+            continue
+        make_annotations(bc)
+
     return cls
 
 
@@ -143,21 +151,19 @@ def mul3(x, y, z):
 
     return x @ y @ z
 
-legacy_icons = {}
-legacy_icons['ADD'] = 'ZOOMIN'
-legacy_icons['REMOVE'] = 'ZOOMOUT'
-legacy_icons['ARROW_LEFTRIGHT'] = 'MAN_SCALE'
-legacy_icons['FILE_FOLDER'] = 'FILESEL'
-legacy_icons['FILE_NEW'] = 'NEW'
-legacy_icons['FILEBROWSER'] = 'FILESEL'
+legacy_icons = {
+    'ADD': 'ZOOMIN',
+    'REMOVE': 'ZOOMOUT',
+    'ARROW_LEFTRIGHT': 'MAN_SCALE',
+    'FILE_FOLDER': 'FILESEL',
+    'FILE_NEW': 'NEW',
+    'FILEBROWSER': 'FILESEL',
+}
 
 def icon(key):
     if IS_LEGACY:
         # 対応アイコンがdictにない場合はNONEとする
-        icon_name = legacy_icons.get(key)
-        if icon_name is None:
-            icon_name = 'NONE'
-        return icon_name
+        return legacy_icons.get(key, 'NONE')
     else:
         return key
 

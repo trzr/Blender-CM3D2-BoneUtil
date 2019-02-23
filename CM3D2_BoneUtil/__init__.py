@@ -13,7 +13,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/wiki",
     "tracker_url": "https://github.com/trzr/Blender-CM3D2-BoneUtil/issues",
-    "category": "Tools"
+    "category": "Object"
 }
 
 
