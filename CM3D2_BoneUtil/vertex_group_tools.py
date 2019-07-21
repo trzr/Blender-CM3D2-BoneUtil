@@ -12,7 +12,7 @@ from . import compatibility as compat
 from typing import List, Any, Match, Set
 
 
-def menu_func_specials(self, context: bpy.types.Context) -> None:
+def menu_func(self, context: bpy.types.Context) -> None:
     if not common.prefs().feature_vgroups:
         return
     ob = context.active_object

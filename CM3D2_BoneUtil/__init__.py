@@ -114,7 +114,10 @@ def register():
     bpy.types.OBJECT_PT_context_object.append(bonedata_importer.menu_func)
     bpy.types.OBJECT_PT_context_object.append(bonetype_renamer.menu_func)
 
-    bpy.types.MESH_MT_vertex_group_specials.append(vertex_group_tools.menu_func_specials)
+    if compatibility.IS_LEGACY:
+        bpy.types.MESH_MT_vertex_group_specials.append(vertex_group_tools.menu_func)
+    else:
+        bpy.types.MESH_MT_vertex_group_context_menu.append(vertex_group_tools.menu_func)
 
     # initialize properties
     bpy.types.Scene.trzr_select_props = bpy.props.PointerProperty(type=selection_tool.LocalProps)
@@ -131,7 +134,10 @@ def unregister():
     del bpy.types.Scene.trzr_select_props
 
     # remove menu
-    bpy.types.MESH_MT_vertex_group_specials.remove(vertex_group_tools.menu_func_specials)
+    if compatibility.IS_LEGACY:
+        bpy.types.MESH_MT_vertex_group_specials.remove(vertex_group_tools.menu_func)
+    else:
+        bpy.types.MESH_MT_vertex_group_context_menu.append(vertex_group_tools.menu_func)
 
     bpy.types.OBJECT_PT_context_object.remove(bonedata_importer.menu_func)
     bpy.types.OBJECT_PT_context_object.remove(bonetype_renamer.menu_func)
