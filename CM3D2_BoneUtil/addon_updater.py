@@ -47,13 +47,13 @@ class BUTL_OT_Updater(bpy.types.Operator):
             for path in zip_reader.namelist():
                 if not os.path.basename(path):
                     continue
-                sub_dir = os.path.split( os.path.split(path)[0] )[1]
+                sub_dir = os.path.split(os.path.split(path)[0])[1]
                 if sub_dir == 'CM3D2_BoneUtil':
                     with open(os.path.join(addon_path, os.path.basename(path)), 'wb') as file:
                         file.write(zip_reader.read(path))
 
         hist.now_ver = hist.latest_ver
-        ver = '.'.join([ str(v) for v in hist.now_ver ])
+        ver = '.'.join([str(v) for v in hist.now_ver])
         prefs.version = ver
         self.report(type={'INFO'}, message=bpy.app.translations.pgettext('butl.updater.Finished') % ver)
         try:
@@ -103,26 +103,26 @@ class VersionHistory:
             if len(update) < 19:
                 continue
 
-            updates.append( datetime.strptime(update[0:19], '%Y-%m-%dT%H:%M:%S') )
+            updates.append(datetime.strptime(update[0:19], '%Y-%m-%dT%H:%M:%S'))
             vers.append(ver)
             titles.append(title)
             links.append(link)
 
         self.titles = titles
-        self.vers   = vers
+        self.vers = vers
         self.updates = updates
         self.links = links
         self.updated_time = now
         if len(self.vers) > 0:
             self.latest_version = self.vers[0]
             try:
-                self.latest_ver = [ int(v) for v in self.latest_version.split('.') ]
+                self.latest_ver = [int(v) for v in self.latest_version.split('.')]
             except:
                 pass
 
         if len(self.now_ver) == 0:
             ver = common.prefs().version
-            self.now_ver = ( int(v) for v in ver.split('.') )
+            self.now_ver = (int(v) for v in ver.split('.'))
 
     def get_dl_link(self, rel: dict) -> str:
         assets = rel['assets']

@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# idea
-.idea
-
 # Distribution / packaging
 .Python
 env/
@@ -25,3 +22,8 @@ sdist/
 var/
 docs/
 Release/
+
+# IDE
+.idea
+.vscode/
+

@@ -359,12 +359,12 @@ class BUTL_OT_BoneDataImporter(bpy.types.Operator):
                         if bdata1.is_nub and bdata1.parent_name in self.bone_names:
                             continue
 
-                        del self.target_props[ bdata1.prop_name ]
+                        del self.target_props[bdata1.prop_name]
                         count_bd_del += 1
 
                         lbdata1 = self.lbd_dic.get(bdata1.name)
                         if lbdata1:
-                            del self.target_props[ lbdata1[1] ]
+                            del self.target_props[lbdata1[1]]
                             count_lbd_del += 1
 
                 # LocalBoneDataの削除
@@ -712,7 +712,7 @@ class BUTL_OT_BoneDataImporter(bpy.types.Operator):
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
                     [0, 0, 1, 0],
-                    [mt.x + float(self.coor[0]), mt.y - float(self.coor[2]), mt.z + float(self.coor[1]), 1] ])
+                    [mt.x + float(self.coor[0]), mt.y - float(self.coor[2]), mt.z + float(self.coor[1]), 1]])
                 localbone = compat.mul(matrix, localbone)
 
                 string_localbone = "{0},{1:.17} {2:.17} {3:.17} {4:.17} {5:.17} {6:.17} {7:.17} {8:.17} {9:.17} {10:.17} {11:.17} {12:.17} {13:.17} {14:.17} {15:.17} {16:.17}".format(

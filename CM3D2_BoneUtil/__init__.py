@@ -53,6 +53,7 @@ else:
 
 import bpy
 
+
 # アドオン設定
 @compatibility.BlRegister()
 class BUTL_AddonPreferences(bpy.types.AddonPreferences):
@@ -89,7 +90,6 @@ class BUTL_AddonPreferences(bpy.types.AddonPreferences):
         box.prop(self, 'backup_ext', icon='FILE_BACKUP')
         box.label(text="butl.shapekey.Menu.File", icon='FILE_IMAGE')
         box.prop(self, 'menu_default_path', icon=compatibility.icon('FILEBROWSER'), text="butl.shapekey.Menu.InitFolder")
-
 
         row = layout.row()
         # row.label(self, 'version', icon='INFO')

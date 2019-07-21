@@ -100,11 +100,13 @@ def layout_split(layout, factor=0.0, align=False):
 
     return layout.split(factor=factor, align=align)
 
+
 def get_active():
     if IS_LEGACY:
         return bpy.context.scene.objects.active
     else:
         return bpy.context.view_layer.objects.active
+
 
 def set_active(obj):
     if IS_LEGACY:
@@ -112,11 +114,13 @@ def set_active(obj):
     else:
         bpy.context.view_layer.objects.active = obj
 
+
 def get_select(obj: bpy.types.Object) -> bool:
     if IS_LEGACY:
         return obj.select
 
     return obj.select_get()
+
 
 def set_select(obj: bpy.types.Object, select: bool) -> None:
     if IS_LEGACY:
@@ -124,22 +128,21 @@ def set_select(obj: bpy.types.Object, select: bool) -> None:
     else:
         obj.select_set(select)
 
+
 def is_select(*args) -> bool:
     """すべてが選択状態であるかを判定する."""
     if IS_LEGACY:
         return all(arg.select for arg in args)
 
     return all(arg.select_get() for arg in args)
-        # for arg in args:
-        #     if not arg.select_get():
-        #         return False
-        # return True
+
 
 def get_hide(obj: bpy.types.Object) -> bool:
     if IS_LEGACY:
         return obj.hide
 
     return obj.hide_viewport
+
 
 def set_hide(obj: bpy.types.Object, hide: bool):
     if IS_LEGACY:
@@ -148,11 +151,13 @@ def set_hide(obj: bpy.types.Object, hide: bool):
     else:
         obj.hide_viewport = hide
 
+
 def mul(x, y):
     if IS_LEGACY:
         return x * y
 
     return x @ y
+
 
 def mul3(x, y, z):
     if IS_LEGACY:
@@ -160,7 +165,7 @@ def mul3(x, y, z):
 
     return x @ y @ z
 
-legacy_icons = {
+LEGACY_ICONS = {
     'ADD': 'ZOOMIN',
     'REMOVE': 'ZOOMOUT',
     'ARROW_LEFTRIGHT': 'MAN_SCALE',
@@ -169,12 +174,14 @@ legacy_icons = {
     'FILEBROWSER': 'FILESEL',
 }
 
+
 def icon(key):
     if IS_LEGACY:
         # 対応アイコンがdictにない場合はNONEとする
-        return legacy_icons.get(key, 'NONE')
+        return LEGACY_ICONS.get(key, 'NONE')
     else:
         return key
+
 
 def region_type():
     if IS_LEGACY:

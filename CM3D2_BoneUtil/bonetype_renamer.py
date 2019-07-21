@@ -120,7 +120,7 @@ class BUTL_UL_YureBoneList(bpy.types.UIList):
         split = compat.layout_split(layout, factor=0.05)
         split.prop(item, "selected", text="", icon='NONE')
         split = compat.layout_split(split, factor=0.80)
-        split.label(text=item.name, translate=False, icon='BONE_DATA' )
+        split.label(text=item.name, translate=False, icon='BONE_DATA')
         split.label(text=item.bone_type, translate=False, icon='NONE')
 
 
@@ -175,7 +175,7 @@ class BUTL_OT_BoneListSelecter(bpy.types.Operator):
     bl_idname = "trzr.butl_ot_yurebonelist_select_all"
     bl_label = "Select All"
 
-    def execute(self, context:bpy.types.Context) -> set:
+    def execute(self, context: bpy.types.Context) -> set:
         for bone in context.scene.trzr_butl_bone_list.yure_bones:
             bone.selected = True
         return {'FINISHED'}
@@ -224,7 +224,7 @@ class BUTL_OT_BoneListUpdater(bpy.types.Operator):
     def refresh_bonelist(cls, context: bpy.types.Context) -> None:
         ob = context.active_object
         
-        if ob.type == 'MESH': # ob.parent and ob.parent.type == 'ARMATURE': # 呼び出し前に確認されている前提とする
+        if ob.type == 'MESH':  # ob.parent and ob.parent.type == 'ARMATURE': # 呼び出し前に確認されている前提とする
             target_bones = ob.parent.data.bones
             target_props = context.active_object.items()
         elif ob.type == 'ARMATURE':
@@ -257,7 +257,6 @@ class BUTL_OT_BoneListUpdater(bpy.types.Operator):
                     item.bone_type = bone_type
 
                     item.selected = selected_dic[bone.name] if (bone.name in selected_dic) else False
-
 
     @classmethod
     def parse_bone_names(cls, target_props: list) -> set:
@@ -292,7 +291,7 @@ class BUTL_OT_BoneTypeChanger(bpy.types.Operator):
                 rename_list.append( (bone.name, replaced) )
         return rename_list
 
-    def execute(self, context:bpy.types.Context) -> set:
+    def execute(self, context: bpy.types.Context) -> set:
         rename_list = self.create_rename_list(context)
 
         ob = context.active_object

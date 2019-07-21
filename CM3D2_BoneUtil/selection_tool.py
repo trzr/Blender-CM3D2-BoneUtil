@@ -142,14 +142,38 @@ class BUTL_OT_ArmSelectOperator(bpy.types.Operator):
         elif self.target == 'ge':
             loop(bones, lambda b: get_val(b) >= base - margin)  # type: ignore
         elif self.target == 'eq':
-            loop(bones, lambda b: base - margin <= get_val(b) <= base + margin )  # type: ignore
+            loop(bones, lambda b: base - margin <= get_val(b) <= base + margin)  # type: ignore
         elif self.target == 'le':
-            loop(bones, lambda b: get_val(b) <= base + margin )  # type: ignore
+            loop(bones, lambda b: get_val(b) <= base + margin)  # type: ignore
         elif self.target == 'lt':
-            loop(bones, lambda b: get_val(b) < base - margin )  # type: ignore
+            loop(bones, lambda b: get_val(b) < base - margin)  # type: ignore
 
         self.report(type={'INFO'}, message="selutl.UpdateSelectedBones")
         return {'FINISHED'}
+
+
+def get_co_x(co: mathutils.Vector):
+    return co.x
+
+
+def get_co_y(co: mathutils.Vector):
+    return co.y
+
+
+def get_co_z(co: mathutils.Vector):
+    return co.z
+
+
+def negative_x(co: mathutils.Vector):
+    co.x = -co.x
+
+
+def negative_y(co: mathutils.Vector):
+    co.y = -co.y
+
+
+def negative_z(co: mathutils.Vector):
+    co.z = -co.z
 
 
 @compat.BlRegister()
@@ -193,11 +217,11 @@ class BUTL_OT_MeshSelectOperator(bpy.types.Operator):
         margin = sel_props.margin
 
         if sel_props.axis == 'x':
-            get_val = lambda co: co.x
+            get_val = get_co_x
         elif sel_props.axis == 'y':
-            get_val = lambda co: co.y
+            get_val = get_co_y
         else:
-            get_val = lambda co: co.z
+            get_val = get_co_z
 
         changed_vertex = []  # type: List[Any]
 
@@ -236,16 +260,6 @@ class BUTL_OT_MeshSelectOperator(bpy.types.Operator):
         bmesh.update_edit_mesh(me)
         self.report(type={'INFO'}, message="selutl.UpdateSelected")
         return {'FINISHED'}
-
-
-def negative_x(co: mathutils.Vector):
-    co.x = -co.x
-
-def negative_y(co: mathutils.Vector):
-    co.y = -co.y
-
-def negative_z(co: mathutils.Vector):
-    co.z = -co.z
 
 
 @compat.BlRegister()
@@ -289,13 +303,13 @@ class BUTL_OT_MeshSelectSymOperator(bpy.types.Operator):
         get_val = None  # type: Optional[Callable[[Any], float]]
         negative_co = None  # type: Optional[Callable[[mathutils.Vector], None]]
         if sel_props.axis == 'x':
-            get_val = lambda co: co.x
+            get_val = get_co_x
             negative_co = negative_x
         elif sel_props.axis == 'y':
-            get_val = lambda co: co.y
+            get_val = get_co_y
             negative_co = negative_y
         else:
-            get_val = lambda co: co.z
+            get_val = get_co_z
             negative_co = negative_z
 
         changed_vertices = []
@@ -360,7 +374,7 @@ class BUTL_OT_SelectBaseClearer(bpy.types.Operator):
     bl_label = 'clear base'
     bl_description = bpy.app.translations.pgettext('selutl.ClearBaseDesc')
 
-    def execute(self, context:bpy.types.Context) -> set:
+    def execute(self, context: bpy.types.Context) -> set:
         context.scene.trzr_select_props.base = 0.0
         return {'FINISHED'}
 

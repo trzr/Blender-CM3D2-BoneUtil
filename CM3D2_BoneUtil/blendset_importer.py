@@ -108,6 +108,7 @@ class BlendsetItem(bpy.types.PropertyGroup):
     name = bpy.props.StringProperty()
     selected = bpy.props.BoolProperty()
 
+
 @compat.BlRegister(use_bl_attr=False)
 class BUTL_UL_BlendsetList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -131,6 +132,8 @@ class Blendsets(bpy.types.PropertyGroup):
         default=False)
 
 # ========== Operator =====================================
+
+
 @compat.BlRegister()
 class BUTL_OT_BlendsetsUpdater(bpy.types.Operator):
     bl_idname = 'shapekey.trzr_update_blendsets'
@@ -205,7 +208,7 @@ class BUTL_OT_BlendsetsPaster(bpy.types.Operator):
                     val = lines[idx + 1].strip()
                     try:
                         float(val)
-                        kv_list.append( (key, val) )
+                        kv_list.append((key, val))
                     except:
                         msg = bpy.app.translations.pgettext('butl.shapekey.ParseFailed')
                         self.report(type={'WARNING'}, message=msg % val)
@@ -628,7 +631,7 @@ class BUTL_OT_CM3D2MenuImporter(bpy.types.Operator):
                 key = common.read_str(file)
 
                 for i in range(length - 1):
-                    vals.append( common.read_str(file) )
+                    vals.append(common.read_str(file))
 
                 if key == 'blendset':
                     if length >= 2:

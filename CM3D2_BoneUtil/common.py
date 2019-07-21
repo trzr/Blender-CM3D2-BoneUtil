@@ -9,15 +9,17 @@ from typing import Any, Optional
 
 # pt_includeNum = re.compile('.*([01[1-9]|2[0-4]).*')
 
+
 def get_preferences(context):  # type: (bpy.types.Context) -> bpy.types.Preferences
-    if compat.IS_LEGACY:
-    # if hasattr(context, 'user_preferences'):
+    if compat.IS_LEGACY:  # if hasattr(context, 'user_preferences'):
         return context.user_preferences
 
     return context.preferences
 
+
 class PrefsHolder:
     prefs = None
+
 
 # このアドオンの設定値群を呼び出す
 def prefs():  # -> BUTL_AddonPreferences:
@@ -48,6 +50,7 @@ class TransManager:
         if cls.registered:
             bpy.app.translations.unregister(__package__)
             cls.registered = False
+
 
 def trans_text(key):
     return TransManager.trans_text(key)
@@ -132,6 +135,7 @@ def read_str(file, total_b: str='') -> str:
         total_b = b_str[1:] + total_b
         if b_str[0] == '0':
             break
+
     return file.read(int(total_b, 2)).decode('utf-8', 'backslashreplace')
     # return file.read(int(total_b, 2)).decode('utf-8')
 
@@ -141,11 +145,12 @@ def write_str(file, raw_str: str) -> None:
     b_str = format(len(raw_str.encode('utf-8')), 'b')
     for i in range(9):
         if 7 < len(b_str):
-            file.write( struct.pack('<B', int('1' + b_str[-7:], 2)) )
+            file.write(struct.pack('<B', int('1' + b_str[-7:], 2)))
             b_str = b_str[:-7]
         else:
-            file.write( struct.pack('<B', int(b_str, 2)) )
+            file.write(struct.pack('<B', int(b_str, 2)))
             break
+
     file.write(raw_str.encode('utf-8'))
 
 
@@ -154,10 +159,10 @@ def append_str(barray: bytearray, raw_str: str) -> None:
     b_str = format(len(raw_str.encode('utf-8')), 'b')
     for i in range(9):
         if 7 < len(b_str):
-            barray += bytearray( struct.pack('<B', int('1' + b_str[-7:], 2)) )
+            barray += bytearray(struct.pack('<B', int('1' + b_str[-7:], 2)))
             b_str = b_str[:-7]
         else:
-            barray += bytearray( struct.pack('<B', int(b_str, 2)) )
+            barray += bytearray(struct.pack('<B', int(b_str, 2)))
             break
     barray += raw_str.encode('utf-8')
 
