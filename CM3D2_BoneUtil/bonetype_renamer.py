@@ -126,7 +126,7 @@ class BUTL_UL_YureBoneList(bpy.types.UIList):
 
 @compat.BlRegister()
 class BUTL_OT_BoneListSelectItem(bpy.types.Operator):
-    bl_idname = "trzr.butl_ot_bonelist_select_item"
+    bl_idname = 'object.trzr_butl_bonelist_select_item'
     bl_label  = "Select Item"
 
     opr_type = bpy.props.StringProperty(default='')
@@ -145,7 +145,7 @@ class BUTL_OT_BoneListSelectItem(bpy.types.Operator):
 
 # # custom list
 # class ULItems(bpy.types.UIList):
-#     bl_idname = 'BUTL_UL_custom_list'
+#     bl_idname = 'TRZR_BUTL_UL_custom_list'
 
 #     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 #         row = layout.row()
@@ -172,7 +172,7 @@ class BUTL_OT_BoneListSelectItem(bpy.types.Operator):
 
 @compat.BlRegister()
 class BUTL_OT_BoneListSelecter(bpy.types.Operator):
-    bl_idname = "trzr.butl_ot_yurebonelist_select_all"
+    bl_idname = 'object.trzr_butl_yurebonelist_select_all'
     bl_label = "Select All"
 
     def execute(self, context: bpy.types.Context) -> set:
@@ -183,7 +183,7 @@ class BUTL_OT_BoneListSelecter(bpy.types.Operator):
 
 @compat.BlRegister()
 class BUTL_OT_BoneListDeselecter(bpy.types.Operator): 
-    bl_idname = "trzr.butl_ot_yurebonelist_deselect_all"
+    bl_idname = 'object.trzr_butl_yurebonelist_deselect_all'
     bl_label = "Deselect All"
 
     def execute(self, context: bpy.types.Context) -> set:
@@ -191,9 +191,10 @@ class BUTL_OT_BoneListDeselecter(bpy.types.Operator):
             bone.selected = False
         return {'FINISHED'}
 
+
 @compat.BlRegister()
 class BUTL_OT_BoneListUpdater(bpy.types.Operator):
-    bl_idname = "trzr.butl_ot_refresh_bone_list"
+    bl_idname = 'object.trzr_butl_refresh_bone_list'
     bl_label = "Refresh bone list"
 
     # @classmethod
@@ -272,7 +273,7 @@ class BUTL_OT_BoneListUpdater(bpy.types.Operator):
 
 @compat.BlRegister()
 class BUTL_OT_BoneTypeChanger(bpy.types.Operator):
-    bl_idname = "trzr.butl_ot_change_bonetype"
+    bl_idname = 'object.trzr_butl_change_bonetype'
     bl_label = "change bone type"
     bl_options = {'REGISTER', 'UNDO'}
 

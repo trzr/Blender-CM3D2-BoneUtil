@@ -45,7 +45,7 @@ def menu_func_common(self, context: bpy.types.Context) -> None:
 
 @compat.BlRegister()
 class BUTL_OT_BaseBoneRenamer(bpy.types.Operator):
-    bl_idname = 'object.trzr_rename_cm3d2_basebone'
+    bl_idname = 'object.trzr_butl_rename_cm3d2_basebone'
     bl_label = 'Rename BaseBone'
     bl_description = common.trans_text('butl.bdimport.RenameBaseBoneDesc')
     bl_options = {'REGISTER', 'UNDO'}
@@ -162,7 +162,7 @@ class BoneData1(object):
 
 @compat.BlRegister()
 class BUTL_OT_BoneDataImporter(bpy.types.Operator):
-    bl_idname = 'object.trzr_import_cm3d2_bonedata'
+    bl_idname = 'object.trzr_butl_import_cm3d2_bonedata'
     bl_label = 'Import BoneData'
     bl_description = common.trans_text('butl.bdimport.ImportBoneDataDesc')
     bl_options = {'REGISTER', 'UNDO'}

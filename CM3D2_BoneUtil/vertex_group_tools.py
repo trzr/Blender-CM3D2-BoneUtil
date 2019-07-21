@@ -33,7 +33,7 @@ def menu_func_specials(self, context: bpy.types.Context) -> None:
 class BUTL_OT_Bone2VertexGroup(bpy.types.Operator):
     """ボーン情報を元に頂点グループを作成するオペレータ"""
 
-    bl_idname = 'object.trzr_bone_ot_vertex_group'
+    bl_idname = 'object.trzr_butl_vertex_group'
     bl_label = common.trans_text('butl.vgroups.ImportLabel')
     bl_description = common.trans_text('butl.vgroups.ImportDesc')
     bl_options = {'REGISTER', 'UNDO'}

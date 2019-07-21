@@ -16,7 +16,7 @@ from typing import List, Tuple, Set, Optional, Any
 class BUTL_OT_Updater(bpy.types.Operator):
     """Addon Updater."""
 
-    bl_idname = 'trzr.boneutil_ot_updater'
+    bl_idname = 'object.trzr_butl_updater'
     bl_label = 'Update'
     bl_description = common.trans_text('butl.updater.Desc')
     bl_options = {'REGISTER'}
@@ -149,7 +149,7 @@ class VersionHistory:
 class BUTL_MT_History(bpy.types.Menu):
     """更新履歴メニュー."""
 
-    bl_idname = 'trzr.boneutil_mt_history'
+    bl_idname = 'TRZR_BUTL_MT_History' # trzr.boneutil_mt_history'
     bl_label = bpy.app.translations.pgettext('butl.updater.History')
 
     def draw(self, context: bpy.types.Context) -> None:
