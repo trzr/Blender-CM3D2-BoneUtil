@@ -24,6 +24,7 @@ docs/
 Release/
 
 # IDE
+setup.cfg
 .idea
 .vscode/
 
