@@ -1,12 +1,12 @@
 __author__ = "trzr"
 __status__ = "dev"
-__version__ = "0.4.1"
-__date__ = "23 Feb 2019"  # ctrl+shift+I
+__version__ = "0.4.2"
+__date__ = "21 Jul 2019"  # ctrl+shift+I
 
 bl_info = {
     "name": "CM3D2 BoneUtil",
     "author": "trzr",
-    "version": (0, 4, 1),
+    "version": (0, 4, 2),
     "blender": (2, 80, 0),
     "location": 'Properties > Object Data (Mesh), etc...',
     "description": "Bone data utility for CM3D2/COM3D2",
